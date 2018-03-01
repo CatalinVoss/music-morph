@@ -15,12 +15,19 @@ BARLENGTH = 32
 #The amount to sample from the midi dataset when calculating rewards
 SUBSAMPLE = 1000
 
+frame_count = 0
+
+def env_reset():
+    global frame_count
+    frame_count = 0
+    #print "resetting"
+    return random_state()
 
 def random_state(full=True):
     """
     Debugging function for generating a random state where all buttons are pressed with prob. 1/2 (default)
     or generate a random state where exactly one button is pressed (full=False)
-o    The state has shape (notes, occurences)
+    The state has shape (notes, occurences)
     """
     if full:
         return np.random.rand(NUM_NOTES, NUM_OCCURENCES) > 0.5
@@ -65,3 +72,18 @@ def reward(midi_dataset, state):
         compare = midi_dataset[inds,:]
     diff = compare - midi_state
     return -np.min(np.sum(diff**2,1))
+
+def toggle(action, state):
+    if state.flat[action] == 0:
+        state.flat[action] = 1
+    else:
+        state.flat[action] = 0
+    
+    return state
+
+def env_step(midigold, action, state):
+    global frame_count
+    frame_count += 1
+    #print frame_count
+    state = toggle(action, state)
+    return state, reward(midigold, state), frame_count == 10, None
