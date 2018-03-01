@@ -1,34 +1,38 @@
 import numpy as np
 
 #The possible notes on the launchpad
-NOTES = range(24)
+NOTES = ['C', 'D', 'E', 'F', 'G', 'B', 'Bf', 'Ds']
 NUM_NOTES = len(NOTES)
 
 #The possible occurences on the launchpad
 #If the occurence 'm' is turned on, it adds a one to the note track every m timesteps
-#0 represents the offset for that note, the offset can be any number from 0 to 63 (do a mod)
-OCCURENCES = [1, 2, 4, 8, 16, 32, 64, 0]
+OCCURENCES = [1, 2, 4, 8, 16, 32]
 NUM_OCCURENCES = len(OCCURENCES)
 
 #The length of the generated bar
-BARLENGTH = 64
+BARLENGTH = 32
 
 #The amount to sample from the midi dataset when calculating rewards
 SUBSAMPLE = 1000
 
+frame_count = 0
+
+def env_reset():
+    global frame_count
+    frame_count = 0
+    #print "resetting"
+    return random_state()
 
 def random_state(full=True):
     """
     Debugging function for generating a random state where all buttons are pressed with prob. 1/2 (default)
     or generate a random state where exactly one button is pressed (full=False)
-o    The state has shape (notes, occurences)
+    The state has shape (notes, occurences)
     """
     if full:
-        res = np.int32(np.random.rand(NUM_NOTES, NUM_OCCURENCES) > 0.5)
-        res[:, -1] = np.random.randint(BARLENGTH, size=NUM_NOTES)
-        return res
+        return np.random.rand(NUM_NOTES, NUM_OCCURENCES) > 0.5
     else:
-        res = np.zeros((NUM_NOTES, NUM_OCCURENCES), dtype=np.int32)
+        res = np.zeros((NUM_NOTES, NUM_OCCURENCES))
         res.flat[np.random.randint(NUM_NOTES*NUM_OCCURENCES)] = 1
         return res
 
@@ -41,13 +45,8 @@ def midify(state, flat=False):
     bar = np.zeros((NUM_NOTES, BARLENGTH))
     for i_n, n in enumerate(NOTES):
         for i_o, o in enumerate(OCCURENCES):
-            if state[i_n,i_o] > 0:
-                if o == 0:
-                    bar[i_n,:] = np.roll(bar[i_n,:], state[i_n, i_o])
-                elif o == 1:
-                    bar[i_n, 0] += 1
-                else:
-                    bar[i_n, np.arange(BARLENGTH) % o == o/2] += 1
+            if state[i_n,i_o] == 1:
+                bar[i_n, np.arange(BARLENGTH) % o == 0] += 1
     if flat:
         return bar.ravel()
     else:
@@ -73,3 +72,17 @@ def reward(midi_dataset, state):
         compare = midi_dataset[inds,:]
     diff = compare - midi_state
     return -np.min(np.sum(diff**2,1))
+
+def toggle(action, state):
+    if state.ravel()[action] == 0:
+        state.ravel()[action] = 1
+    else:
+        state.ravel()[action] = 0
+    return state
+
+def env_step(midigold, action, state):
+    global frame_count
+    frame_count += 1
+    #print frame_count
+    state = toggle(action, state)
+    return state, reward(midigold, state), frame_count == 10, None

@@ -1,0 +1,2 @@
+add_Loss_op
+θ = θ + α ∇_θ log π_θ(s_t, a_t) A_t
