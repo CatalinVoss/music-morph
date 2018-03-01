@@ -21,7 +21,7 @@ def random_state(full=True):
     """
     Debugging function for generating a random state where all buttons are pressed with prob. 1/2 (default)
     or generate a random state where exactly one button is pressed (full=False)
-o    The state has shape (notes, occurences)
+    The state has shape (notes, occurences)
     """
     if full:
         res = np.int32(np.random.rand(NUM_NOTES, NUM_OCCURENCES) > 0.5)
