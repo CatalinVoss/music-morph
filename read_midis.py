@@ -1,5 +1,9 @@
 import numpy as np
 import pretty_midi
+import os
+import os.path
+import random
+import cPickle as pickle
 # np.set_printoptions(threshold=np.nan)
 
 MIN_MIDI_PITCH = 0  # Inclusive.
@@ -13,66 +17,98 @@ ROLL_WINDOW = (47,71) # Middle C is 60
 # How many steps we want to quantize a bar into
 BAR_QUANT = 64.0
 
-midi_data = pretty_midi.PrettyMIDI("/Users/catalin/Downloads/lmd_full/0/0a2c66039e64c43b5b57eefadd820406.mid") # "/Users/catalin/Downloads/lmd_full/3/3c8a1e5c4f9149b82667f5f8b0b5f8bf.mid")
+BAR_NOTES_THRESH = 4
 
-# Note that there's no easy solution to quantify everything into bars https://github.com/craffel/pretty-midi/issues/119
-tempo_estimate_bpm = midi_data.estimate_tempo()
-# This doesn't seem to work too well.
-# If we want to deal with various tempos, we should be using ticks and the ticks per beat given in the midi file instead, tracing out the timing events accordingly...
-# But we don't care tooooo much
-# http://mido.readthedocs.io/en/latest/midi_files.html
-# Get a tempo estimate in beats per minute
-# Compute global beat len estimate assuming the tempo doesn't change
-beat_len_estimate = 60.0/tempo_estimate_bpm
+def find_midi_paths(midi_dir, nsamples=None):
+    """
+    Returns all midi file paths for all .mid's found in various subdirectories
+    If nsample is passed, only returns a random subset of them
+    """
+    paths = []
+    for dirpath, dirnames, filenames in os.walk(midi_dir):
+        for filename in [f for f in filenames if f.endswith(".mid")]:
+            paths.append(os.path.join(dirpath, filename))
 
-beats = midi_data.get_beats()
-downbeats = midi_data.get_downbeats()
+    if nsamples:
+        return random.sample(paths, nsamples)
+    return paths
 
-# Hacky solution: Assume the beats stay constant after the second one...
-beat_len_estimate = beats[2]-beats[1]
+def construct_dataset(output_path, datadir, nsamples=None):
+    """
+    Builds a dataset of bars from a directory of (subdirectories of) midi files that hopefully still fits into memory
+    """
+    midis = find_midi_paths(datadir, nsamples)
+    nmidis = len(midis)
+    all_bars = []
+    for idx, midi in enumerate(midis):
+        try:
+            all_bars += get_midi_bars(midi)
+            print("Processed file (%d/%d): %s" % (idx+1, nmidis, midi))
+        except KeyboardInterrupt:
+            print("Cancelled by user")
+            break
+        except:
+            print("Could not process file: "+midi)
 
-# Each column will be spaced apart by 1./fs seconds
-fs = 1.0/(beat_len_estimate/BAR_QUANT)
+    all_bars = np.array(all_bars)
+    print("Constructed dataset: %d example bars of size %d each" % (all_bars.shape[0], all_bars.shape[1]))
 
-song_bars = []
+    with open(output_path, 'wb') as handle:
+        pickle.dump(all_bars, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-for instrument in midi_data.instruments:
-    roll = instrument.get_piano_roll(fs)
-    assert roll.shape[0] == NUM_NOTES
+def load_dataset(dataset_path):
+    with open(dataset_path, 'rb') as handle:
+        all_bars = pickle.load(handle)
+        return all_bars
 
-    if LIMIT_ROLL:
-        roll = roll[ROLL_WINDOW[0]:ROLL_WINDOW[1]]
+def get_midi_bars(midi_fn):
+    """
+    Gets us a list of flattened piano roll bars from all instruments found in the midi file
+    """
+    midi_data = pretty_midi.PrettyMIDI(midi_fn) # "/Users/catalin/Downloads/lmd_full/3/3c8a1e5c4f9149b82667f5f8b0b5f8bf.mid")
 
-    nbars = int(np.floor(roll.shape[1]/BAR_QUANT))
-    print("Num estimated bars: "+str(nbars))
-    for bidx in range(nbars):
-        bar = roll[:, int(BAR_QUANT*bidx):int(BAR_QUANT*(bidx+1))]
+    # Note that there's no easy solution to quantify everything into bars https://github.com/craffel/pretty-midi/issues/119
+    tempo_estimate_bpm = midi_data.estimate_tempo()
+    # This doesn't seem to work too well.
+    # If we want to deal with various tempos, we should be using ticks and the ticks per beat given in the midi file instead, tracing out the timing events accordingly...
+    # But we don't care tooooo much
+    # http://mido.readthedocs.io/en/latest/midi_files.html
+    # Get a tempo estimate in beats per minute
+    # Compute global beat len estimate assuming the tempo doesn't change
+    beat_len_estimate = 60.0/tempo_estimate_bpm
 
-        # Retain flattened bars
-        song_bars.append(np.ravel(bar))
+    beats = midi_data.get_beats()
+    downbeats = midi_data.get_downbeats()
+
+    # Hacky solution: Assume the beats stay constant after the second one...
+    beat_len_estimate = beats[2]-beats[1]
+
+    # Each column will be spaced apart by 1./fs seconds
+    fs = 1.0/(beat_len_estimate/BAR_QUANT)
+
+    song_bars = []
+
+    for instrument in midi_data.instruments:
+        roll = instrument.get_piano_roll(fs)
+        assert roll.shape[0] == NUM_NOTES
+
+        if LIMIT_ROLL:
+            roll = roll[ROLL_WINDOW[0]:ROLL_WINDOW[1]]
+
+        nbars = int(np.floor(roll.shape[1]/BAR_QUANT))
+        # print("Num estimated bars: "+str(nbars))
+
+        for bidx in range(nbars):
+            bar = roll[:, int(BAR_QUANT*bidx):int(BAR_QUANT*(bidx+1))].astype(np.uint8)
+
+            num_notes = np.count_nonzero(bar)
+
+            if num_notes >= BAR_NOTES_THRESH:
+                # Retain flattened bars
+                song_bars.append(np.ravel(bar))
+
+    return song_bars
 
 
-
-"""
-# python-midi
-
-import midi
-pattern = midi.read_midifile("/Users/catalin/Downloads/lmd_full/3/3c8a1e5c4f9149b82667f5f8b0b5f8bf.mid")
-print(pattern)
-"""
-
-
-
-"""
-# mido
-
-from mido import MidiFile
-
-mid = MidiFile('/Users/catalin/Downloads/lmd_full/3/3c8a1e5c4f9149b82667f5f8b0b5f8bf.mid')
-
-for i, track in enumerate(mid.tracks):
-    print('Track {}: {}'.format(i, track.name))
-    for msg in track:
-        print(msg)
-
-"""
+if __name__ == "__main__":
+    construct_dataset('data/test_dataset.p', '/Users/catalin/Downloads/lmd_full', nsamples=100)
