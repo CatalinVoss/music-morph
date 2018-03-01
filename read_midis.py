@@ -6,18 +6,20 @@ import random
 import cPickle as pickle
 # np.set_printoptions(threshold=np.nan)
 
-MIN_MIDI_PITCH = 0  # Inclusive.
-MAX_MIDI_PITCH = 127  # Inclusive.
-NUM_NOTES = 128
-NOTES_PER_OCTAVE = 12
-
 LIMIT_ROLL = True
 ROLL_WINDOW = (47,71) # Middle C is 60
 
 # How many steps we want to quantize a bar into
 BAR_QUANT = 64.0
 
-BAR_NOTES_THRESH = 4
+BAR_NOTES_THRESH = 40
+
+# MIDI constants
+MIN_MIDI_PITCH = 0  # Inclusive.
+MAX_MIDI_PITCH = 127  # Inclusive.
+MIDI_NUM_NOTES = 128
+NOTES_PER_OCTAVE = 12
+
 
 def find_midi_paths(midi_dir, nsamples=None):
     """
