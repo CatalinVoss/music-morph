@@ -1,16 +1,17 @@
 import numpy as np
 
 #The possible notes on the launchpad
-NOTES = ['C', 'D', 'E', 'F', 'G', 'B', 'Bf', 'Ds']
+NOTES = range(24)
 NUM_NOTES = len(NOTES)
 
 #The possible occurences on the launchpad
 #If the occurence 'm' is turned on, it adds a one to the note track every m timesteps
-OCCURENCES = [1, 2, 4, 8, 16, 32]
+#0 represents the offset for that note, the offset can be any number from 0 to 63 (do a mod)
+OCCURENCES = [1, 2, 4, 8, 16, 32, 64, 0]
 NUM_OCCURENCES = len(OCCURENCES)
 
 #The length of the generated bar
-BARLENGTH = 32
+BARLENGTH = 64
 
 #The amount to sample from the midi dataset when calculating rewards
 SUBSAMPLE = 1000
@@ -23,9 +24,11 @@ def random_state(full=True):
     The state has shape (notes, occurences)
     """
     if full:
-        return np.random.rand(NUM_NOTES, NUM_OCCURENCES) > 0.5
+        res = np.int32(np.random.rand(NUM_NOTES, NUM_OCCURENCES) > 0.5)
+        res[:, -1] = np.random.randint(BARLENGTH, size=NUM_NOTES)
+        return res
     else:
-        res = np.zeros((NUM_NOTES, NUM_OCCURENCES))
+        res = np.zeros((NUM_NOTES, NUM_OCCURENCES), dtype=np.int32)
         res.flat[np.random.randint(NUM_NOTES*NUM_OCCURENCES)] = 1
         return res
 
@@ -38,8 +41,13 @@ def midify(state, flat=False):
     bar = np.zeros((NUM_NOTES, BARLENGTH))
     for i_n, n in enumerate(NOTES):
         for i_o, o in enumerate(OCCURENCES):
-            if state[i_n,i_o] == 1:
-                bar[i_n, np.arange(BARLENGTH) % o == 0] += 1
+            if state[i_n,i_o] > 0:
+                if o == 0:
+                    bar[i_n,:] = np.roll(bar[i_n,:], state[i_n, i_o])
+                elif o == 1:
+                    bar[i_n, 0] += 1
+                else:
+                    bar[i_n, np.arange(BARLENGTH) % o == o/2] += 1
     if flat:
         return bar.ravel()
     else:
