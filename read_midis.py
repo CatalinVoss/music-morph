@@ -4,15 +4,18 @@ import os
 import os.path
 import random
 import cPickle as pickle
+import matplotlib.pyplot as plt
 # np.set_printoptions(threshold=np.nan)
 
 LIMIT_ROLL = True
 ROLL_WINDOW = (47,71) # Middle C is 60
+NUM_NOTES = 24
 
 # How many steps we want to quantize a bar into
-BAR_QUANT = 64.0
+BAR_QUANT = 64
 
 BAR_NOTES_THRESH = 40
+BAR_KEYS_THRESH = 2
 
 # MIDI constants
 MIN_MIDI_PITCH = 0  # Inclusive.
@@ -63,6 +66,11 @@ def load_dataset(dataset_path):
         all_bars = pickle.load(handle)
         return all_bars
 
+def visualize_bar(bar):
+    im = np.reshape(bar,(NUM_NOTES, BAR_QUANT))
+    plt.imshow(im, cmap='hot', interpolation='nearest')
+    plt.show()
+
 def get_midi_bars(midi_fn):
     """
     Gets us a list of flattened piano roll bars from all instruments found in the midi file
@@ -86,26 +94,27 @@ def get_midi_bars(midi_fn):
     beat_len_estimate = beats[2]-beats[1]
 
     # Each column will be spaced apart by 1./fs seconds
-    fs = 1.0/(beat_len_estimate/BAR_QUANT)
+    fs = 1.0/(float(beat_len_estimate)/BAR_QUANT)
 
     song_bars = []
 
     for instrument in midi_data.instruments:
         roll = instrument.get_piano_roll(fs)
-        assert roll.shape[0] == NUM_NOTES
+        assert roll.shape[0] == MIDI_NUM_NOTES
 
         if LIMIT_ROLL:
             roll = roll[ROLL_WINDOW[0]:ROLL_WINDOW[1]]
 
-        nbars = int(np.floor(roll.shape[1]/BAR_QUANT))
+        nbars = int(np.floor(roll.shape[1]/float(BAR_QUANT)))
         # print("Num estimated bars: "+str(nbars))
 
         for bidx in range(nbars):
             bar = roll[:, int(BAR_QUANT*bidx):int(BAR_QUANT*(bidx+1))].astype(np.uint8)
 
-            num_notes = np.count_nonzero(bar)
+            num_notes = np.count_nonzero(bar) # across all keys
+            num_keys = np.sum(bar.any(axis=1)) # number of keys in which there is some note played
 
-            if num_notes >= BAR_NOTES_THRESH:
+            if num_notes >= BAR_NOTES_THRESH and num_keys >= BAR_KEYS_THRESH:
                 # Retain flattened bars
                 song_bars.append(np.ravel(bar))
 
