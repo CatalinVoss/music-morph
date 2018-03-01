@@ -16,6 +16,14 @@ BARLENGTH = 64
 #The amount to sample from the midi dataset when calculating rewards
 SUBSAMPLE = 1000
 
+frame_count = 0
+
+def env_reset():
+    global frame_count
+    frame_count = 0
+    #print "resetting"
+    return random_state()
+
 
 def random_state(full=True):
     """
@@ -73,3 +81,16 @@ def reward(midi_dataset, state):
         compare = midi_dataset[inds,:]
     diff = compare - midi_state
     return -np.min(np.sum(diff**2,1))
+
+
+def toggle(action, state):
+    state.flat[action] += 1
+    state[:,:-1] %= 2
+    state[:,-1] %= BARLENGTH
+
+def env_step(midigold, action, state):
+    global frame_count
+    frame_count += 1
+    #print frame_count
+    state = toggle(action, state)
+    return state, reward(midigold, state), frame_count == 10, None
