@@ -15,7 +15,7 @@ BAR_QUANT = 64.0
 
 midi_data = pretty_midi.PrettyMIDI("/Users/catalin/Downloads/lmd_full/0/0a2c66039e64c43b5b57eefadd820406.mid") # "/Users/catalin/Downloads/lmd_full/3/3c8a1e5c4f9149b82667f5f8b0b5f8bf.mid")
 
-
+# Note that there's no easy solution to quantify everything into bars https://github.com/craffel/pretty-midi/issues/119
 tempo_estimate_bpm = midi_data.estimate_tempo()
 # This doesn't seem to work too well.
 # If we want to deal with various tempos, we should be using ticks and the ticks per beat given in the midi file instead, tracing out the timing events accordingly...
@@ -28,7 +28,7 @@ beat_len_estimate = 60.0/tempo_estimate_bpm
 beats = midi_data.get_beats()
 downbeats = midi_data.get_downbeats()
 
-# Assuming the beats stay constant after the second one...
+# Hacky solution: Assume the beats stay constant after the second one...
 beat_len_estimate = beats[2]-beats[1]
 
 # Each column will be spaced apart by 1./fs seconds
@@ -50,28 +50,6 @@ for instrument in midi_data.instruments:
 
         # Retain flattened bars
         song_bars.append(np.ravel(bar))
-
-
-
-# Ignoring pitch bends
-# for db in downbeats
-
-
-
-print(beats)
-print(downbeats)
-# print(midi_data.get_piano_roll()) # "Flattened across instruments"
-
-for instrument in midi_data.instruments:
-
-    print(instrument.notes)
-    print(instrument.get_piano_roll()[64])
-    # Don't want to shift drum notes
-    # if not instrument.is_drum:
-    #     for note in instrument.notes:
-    #         note.pitch += 5
-
-# To get to bars https://github.com/craffel/pretty-midi/issues/119
 
 
 
