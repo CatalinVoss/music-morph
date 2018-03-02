@@ -87,7 +87,7 @@ def toggle(action, state):
     state.flat[action] += 1
     state[:,:-1] %= 2
     state[:,-1] %= BARLENGTH
-
+    return state
 def env_step(midigold, action, state):
     global frame_count
     frame_count += 1
