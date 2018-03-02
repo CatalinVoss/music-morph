@@ -94,6 +94,9 @@ def get_midi_bars(midi_fn):
     song_bars = []
 
     for instrument in midi_data.instruments:
+        if instrument.is_drum:
+            continue
+
         roll = instrument.get_piano_roll(fs)
         assert roll.shape[0] == MIDI_NUM_NOTES
 
