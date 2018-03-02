@@ -34,6 +34,7 @@ def find_midi_paths(midi_dir, nsamples=None):
             paths.append(os.path.join(dirpath, filename))
 
     if nsamples:
+        print paths
         return random.sample(paths, nsamples)
     return paths
 
@@ -160,4 +161,4 @@ def get_midi_bars(midi_fn):
 
 
 if __name__ == "__main__":
-    construct_dataset('data/test_dataset.p', '/Users/catalin/Downloads/lmd_full', nsamples=100)
+    construct_dataset('data/test_dataset.p', 'lmd_full', nsamples=100)
