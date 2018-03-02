@@ -125,7 +125,16 @@ def visualize_bar(bar):
     plt.imshow(im, cmap='hot', interpolation='nearest')
     plt.show()
 
-def play_bar(bar, output_midi, output_tempo=100):
+def generate_bars(bars, output_midi, output_tempo=100):
+    roll = np.hstack([np.reshape(b,(NUM_NOTES, BAR_QUANT)) for b in bars])
+    generate_midi(roll, output_midi, output_tempo)
+
+def generate_bar(bar, output_midi, output_tempo=100):
+    # Expand flattened representation into piano roll
+    bar = np.reshape(bar,(NUM_NOTES, BAR_QUANT))
+    generate_midi(bar, output_midi, output_tempo)
+
+def generate_midi(roll, output_midi, output_tempo=100):
     """
     Assuming cols are meant to be spaced apart 1/output_tempo seconds
     Adapted from https://github.com/craffel/pretty-midi/blob/master/examples/reverse_pianoroll.py
@@ -134,16 +143,13 @@ def play_bar(bar, output_midi, output_tempo=100):
     midi = pretty_midi.PrettyMIDI()
     instrument = pretty_midi.Instrument(program=0)
 
-    # Expand flattened representation into piano roll
-    bar = np.reshape(bar,(NUM_NOTES, BAR_QUANT))
-
-    num_notes = bar.shape[0]
+    num_notes = roll.shape[0]
 
     # Pad 1 column of zeros so we can acknowledge inital and ending events
-    bar = np.pad(bar, [(0, 0), (1, 1)], 'constant')
+    roll = np.pad(roll, [(0, 0), (1, 1)], 'constant')
 
     # Use changes in velocities to find note on / note off events
-    velocity_changes = np.nonzero(np.diff(bar).T)
+    velocity_changes = np.nonzero(np.diff(roll).T)
 
     # Keep track on velocities and note on times
     prev_velocities = np.zeros(num_notes, dtype=int)
@@ -154,7 +160,7 @@ def play_bar(bar, output_midi, output_tempo=100):
         pitch = idx
 
         # Use time + 1 because of padding above
-        velocity = bar[pitch, time + 1]
+        velocity = roll[pitch, time + 1]
         time = time / output_tempo
         if velocity > 0:
             if prev_velocities[pitch] == 0:
