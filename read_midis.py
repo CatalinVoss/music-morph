@@ -5,6 +5,8 @@ import os.path
 import random
 import cPickle as pickle
 import matplotlib.pyplot as plt
+# import librosa.display
+# import pygame, pygame.sndarray
 # np.set_printoptions(threshold=np.nan)
 
 ROLL_WINDOW = (47,71) # Middle C is 60
@@ -64,63 +66,11 @@ def load_dataset(dataset_path):
         all_bars = pickle.load(handle)
         return all_bars
 
-def visualize_bar(bar):
-    im = np.reshape(bar,(NUM_NOTES, BAR_QUANT))
-    plt.imshow(im, cmap='hot', interpolation='nearest')
-    plt.show()
-
-def play_bar(bar, output_midi, output_tempo=100):
-    """
-    Assuming cols are meant to be spaced apart 1/output_tempo seconds
-    """
-
-    midi = pretty_midi.PrettyMIDI()
-    instrument = pretty_midi.Instrument(program=0)
-
-    # Expand flattened representation into piano roll
-    bar = np.reshape(bar,(NUM_NOTES, BAR_QUANT))
-    
-    num_notes = bar.shape[0]
-    print(num_notes)
-
-    # Pad 1 column of zeros so we can acknowledge inital and ending events
-    bar = np.pad(bar, [(0, 0), (1, 1)], 'constant')
-
-    # Use changes in velocities to find note on / note off events
-    velocity_changes = np.nonzero(np.diff(bar).T)
-
-    # Keep track on velocities and note on times
-    prev_velocities = np.zeros(num_notes, dtype=int)
-    note_on_time = np.zeros(num_notes)
-
-    for time, idx in zip(*velocity_changes):
-        # Get pitch, adjusting for our roll window
-        pitch = idx
-
-        # Use time + 1 because of padding above
-        velocity = bar[pitch, time + 1]
-        time = time / output_tempo
-        if velocity > 0:
-            if prev_velocities[pitch] == 0:
-                note_on_time[pitch] = time
-                prev_velocities[pitch] = velocity
-        else:
-            note = pretty_midi.Note(
-                velocity=prev_velocities[pitch],
-                pitch=pitch + ROLL_WINDOW[0], # !
-                start=note_on_time[pitch],
-                end=time)
-            instrument.notes.append(note)
-            prev_velocities[pitch] = 0
-
-    midi.instruments.append(instrument)
-    midi.write(output_midi)
-
 def get_midi_bars(midi_fn):
     """
     Gets us a list of flattened piano roll bars from all instruments found in the midi file
     """
-    midi_data = pretty_midi.PrettyMIDI(midi_fn) # "/Users/catalin/Downloads/lmd_full/3/3c8a1e5c4f9149b82667f5f8b0b5f8bf.mid")
+    midi_data = pretty_midi.PrettyMIDI(midi_fn)
 
     # Note that there's no easy solution to quantify everything into bars https://github.com/craffel/pretty-midi/issues/119
     tempo_estimate_bpm = midi_data.estimate_tempo()
@@ -164,6 +114,70 @@ def get_midi_bars(midi_fn):
 
     return song_bars
 
+def visualize_bar(bar):
+    """
+    Plots a bar in midi space
+    """
+    im = np.reshape(bar,(NUM_NOTES, BAR_QUANT))
+    plt.imshow(im, cmap='hot', interpolation='nearest')
+    plt.show()
+
+def play_bar(bar, output_midi, output_tempo=100):
+    """
+    Assuming cols are meant to be spaced apart 1/output_tempo seconds
+    Adapted from https://github.com/craffel/pretty-midi/blob/master/examples/reverse_pianoroll.py
+    """
+
+    midi = pretty_midi.PrettyMIDI()
+    instrument = pretty_midi.Instrument(program=0)
+
+    # Expand flattened representation into piano roll
+    bar = np.reshape(bar,(NUM_NOTES, BAR_QUANT))
+
+    num_notes = bar.shape[0]
+
+    # Pad 1 column of zeros so we can acknowledge inital and ending events
+    bar = np.pad(bar, [(0, 0), (1, 1)], 'constant')
+
+    # Use changes in velocities to find note on / note off events
+    velocity_changes = np.nonzero(np.diff(bar).T)
+
+    # Keep track on velocities and note on times
+    prev_velocities = np.zeros(num_notes, dtype=int)
+    note_on_time = np.zeros(num_notes)
+
+    for time, idx in zip(*velocity_changes):
+        # Get pitch, adjusting for our roll window
+        pitch = idx
+
+        # Use time + 1 because of padding above
+        velocity = bar[pitch, time + 1]
+        time = time / output_tempo
+        if velocity > 0:
+            if prev_velocities[pitch] == 0:
+                note_on_time[pitch] = time
+                prev_velocities[pitch] = velocity
+        else:
+            note = pretty_midi.Note(
+                velocity=prev_velocities[pitch],
+                pitch=pitch + ROLL_WINDOW[0], # !
+                start=note_on_time[pitch],
+                end=time)
+            instrument.notes.append(note)
+            prev_velocities[pitch] = 0
+
+    midi.instruments.append(instrument)
+    # synth = midi.synthesize(fs=16000)
+    midi.write(output_midi)
+
+def play_for(sample_wave, ms):
+    """Play the given NumPy array, as a sound, for ms milliseconds."""
+    sound = pygame.sndarray.make_sound(sample_wave)
+    sound.play(-1)
+    pygame.time.delay(ms)
+    sound.stop()
 
 if __name__ == "__main__":
-    construct_dataset('data/test_dataset.p', 'lmd_full', nsamples=100)
+    # # pygame.init()
+    # pygame.mixer.init(44100, -16,1,2048)
+    construct_dataset('data/test_dataset.p', '/Users/catalin/Downloads/lmd_full', nsamples=100)
