@@ -7,7 +7,6 @@ import cPickle as pickle
 import matplotlib.pyplot as plt
 # np.set_printoptions(threshold=np.nan)
 
-LIMIT_ROLL = True
 ROLL_WINDOW = (47,71) # Middle C is 60
 NUM_NOTES = 24
 
@@ -70,9 +69,19 @@ def visualize_bar(bar):
     plt.imshow(im, cmap='hot', interpolation='nearest')
     plt.show()
 
-def play_bar(bar, output_midi):
+def play_bar(bar, output_midi, output_tempo=100):
+    """
+    Assuming cols are meant to be spaced apart 1/output_tempo seconds
+    """
+
     midi = pretty_midi.PrettyMIDI()
     instrument = pretty_midi.Instrument(program=0)
+
+    # Expand flattened representation into piano roll
+    bar = np.reshape(bar,(NUM_NOTES, BAR_QUANT))
+    
+    num_notes = bar.shape[0]
+    print(num_notes)
 
     # Pad 1 column of zeros so we can acknowledge inital and ending events
     bar = np.pad(bar, [(0, 0), (1, 1)], 'constant')
@@ -81,18 +90,16 @@ def play_bar(bar, output_midi):
     velocity_changes = np.nonzero(np.diff(bar).T)
 
     # Keep track on velocities and note on times
-    prev_velocities = np.zeros(notes, dtype=int)
-    note_on_time = np.zeros(notes)
+    prev_velocities = np.zeros(num_notes, dtype=int)
+    note_on_time = np.zeros(num_notes)
 
     for time, idx in zip(*velocity_changes):
         # Get pitch, adjusting for our roll window
         pitch = idx
-        if LIMIT_ROLL:
-            pitch += ROLL_WINDOW[0]
 
         # Use time + 1 because of padding above
         velocity = bar[pitch, time + 1]
-        time = time / fs
+        time = time / output_tempo
         if velocity > 0:
             if prev_velocities[pitch] == 0:
                 note_on_time[pitch] = time
@@ -100,7 +107,7 @@ def play_bar(bar, output_midi):
         else:
             note = pretty_midi.Note(
                 velocity=prev_velocities[pitch],
-                pitch=pitch,
+                pitch=pitch + ROLL_WINDOW[0], # !
                 start=note_on_time[pitch],
                 end=time)
             instrument.notes.append(note)
@@ -140,8 +147,7 @@ def get_midi_bars(midi_fn):
         roll = instrument.get_piano_roll(fs)
         assert roll.shape[0] == MIDI_NUM_NOTES
 
-        if LIMIT_ROLL:
-            roll = roll[ROLL_WINDOW[0]:ROLL_WINDOW[1]]
+        roll = roll[ROLL_WINDOW[0]:ROLL_WINDOW[1]]
 
         nbars = int(np.floor(roll.shape[1]/float(BAR_QUANT)))
         # print("Num estimated bars: "+str(nbars))
