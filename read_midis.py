@@ -34,7 +34,6 @@ def find_midi_paths(midi_dir, nsamples=None):
             paths.append(os.path.join(dirpath, filename))
 
     if nsamples:
-        print paths
         return random.sample(paths, nsamples)
     return paths
 
