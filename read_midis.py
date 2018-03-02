@@ -23,7 +23,6 @@ MAX_MIDI_PITCH = 127  # Inclusive.
 MIDI_NUM_NOTES = 128
 NOTES_PER_OCTAVE = 12
 
-
 def find_midi_paths(midi_dir, nsamples=None):
     """
     Returns all midi file paths for all .mid's found in various subdirectories
@@ -70,6 +69,45 @@ def visualize_bar(bar):
     im = np.reshape(bar,(NUM_NOTES, BAR_QUANT))
     plt.imshow(im, cmap='hot', interpolation='nearest')
     plt.show()
+
+def play_bar(bar, output_midi):
+    midi = pretty_midi.PrettyMIDI()
+    instrument = pretty_midi.Instrument(program=0)
+
+    # Pad 1 column of zeros so we can acknowledge inital and ending events
+    bar = np.pad(bar, [(0, 0), (1, 1)], 'constant')
+
+    # Use changes in velocities to find note on / note off events
+    velocity_changes = np.nonzero(np.diff(bar).T)
+
+    # Keep track on velocities and note on times
+    prev_velocities = np.zeros(notes, dtype=int)
+    note_on_time = np.zeros(notes)
+
+    for time, idx in zip(*velocity_changes):
+        # Get pitch, adjusting for our roll window
+        pitch = idx
+        if LIMIT_ROLL:
+            pitch += ROLL_WINDOW[0]
+
+        # Use time + 1 because of padding above
+        velocity = bar[pitch, time + 1]
+        time = time / fs
+        if velocity > 0:
+            if prev_velocities[pitch] == 0:
+                note_on_time[pitch] = time
+                prev_velocities[pitch] = velocity
+        else:
+            note = pretty_midi.Note(
+                velocity=prev_velocities[pitch],
+                pitch=pitch,
+                start=note_on_time[pitch],
+                end=time)
+            instrument.notes.append(note)
+            prev_velocities[pitch] = 0
+
+    midi.instruments.append(instrument)
+    midi.write(output_midi)
 
 def get_midi_bars(midi_fn):
     """
