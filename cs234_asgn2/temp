@@ -1,8 +1,0 @@
-add_Loss_op
-θ = θ + α ∇_θ log π_θ(s_t, a_t) A_t
-
-
-get_returns
-        of Q^π (s_t, a_t):
-    
-       G_t = r_t + γ r_{t+1} + γ^2 r_{t+2} + ... + γ^{T-t} r_T

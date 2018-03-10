@@ -1,3 +1,6 @@
 mido
 pretty-midi
-magenta
+pyfluidsynth
+librosa
+pygame
+#magenta
