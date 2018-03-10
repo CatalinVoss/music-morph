@@ -9,9 +9,13 @@ NUM_NOTES = len(NOTES)
 #0 represents the offset for that note, the offset can be any number from 0 to 63 (do a mod)
 OCCURENCES = [1, 2, 4, 8, 16, 32, 64, 0]
 NUM_OCCURENCES = len(OCCURENCES)
+BEAT_TYPES = NUM_OCCURENCES - 1
 
 #The length of the generated bar
-BARLENGTH = 64
+POW_OF_2 = 6
+BARLENGTH = 2**POW_OF_2
+
+NUM_ACTIONS = NUM_NOTES*BEAT_TYPES + NUM_NOTES*POW_OF_2
 
 #The amount to sample from the midi dataset when calculating rewards
 SUBSAMPLE = 1000
@@ -84,9 +88,19 @@ def reward(midi_dataset, state):
 
 
 def toggle(action, state):
-    state.flat[action] += 1
-    state[:,:-1] %= 2
-    state[:,-1] %= BARLENGTH
+    """
+    Given an action (Integer in range(0,NUM_NOTES*BEAT_TYPES + NUM_NOTES*POW_OF_2))
+    Apply the action to the state (THIS MODIFIES THE STATE IN PLACE) And return the modified state
+    """
+    num_beat_flips = BEAT_TYPES*NUM_NOTES
+    num_offset_changes = POW_OF_2 * NUM_NOTES
+    if action < num_beat_flips:
+        state[:,:-1].flat[action] = (state[:,:-1].flat[action] + 1)%2
+    else:
+        action -= num_beat_flips
+        change = 2**(action % POW_OF_2)
+        note_to_change = action/POW_OF_2
+        state[note_to_change,-1] = (state[note_to_change,-1] + change) % BARLENGTH
     return state
 def env_step(midigold, action, state):
     global frame_count
