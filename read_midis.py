@@ -183,7 +183,7 @@ def generate_midi(roll, output_midi, output_tempo=100):
 
         # Use time + 1 because of padding above
         velocity = roll[pitch, time + 1]
-        time = time / output_tempo
+        time = time / float(output_tempo)
         if velocity > 0:
             if prev_velocities[pitch] == 0:
                 note_on_time[pitch] = time
