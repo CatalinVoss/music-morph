@@ -5,6 +5,8 @@ import os.path
 import random
 import cPickle as pickle
 import matplotlib.pyplot as plt
+import mido
+from time import sleep
 # import librosa.display
 # import pygame, pygame.sndarray
 # np.set_printoptions(threshold=np.nan)
@@ -15,7 +17,7 @@ NUM_NOTES = 24
 # How many steps we want to quantize a bar into
 BAR_QUANT = 64
 
-BAR_NOTES_THRESH = 40
+BAR_NOTES_THRESH = 10
 BAR_KEYS_THRESH = 2
 
 # MIDI constants
@@ -61,7 +63,27 @@ def construct_dataset(output_path, datadir, nsamples=None):
     with open(output_path, 'wb') as handle:
         pickle.dump(all_bars, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
+def construct_dataset_1bar_test(output_path, midifile):
+    """
+    Builds a dataset with a single bar
+    """
+    all_bars = np.array(get_midi_bars(midifile))
+    all_bars = [all_bars[10]] # jeopardy...
+    with open(output_path, 'wb') as handle:
+        pickle.dump(all_bars, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+def construct_dataset_1song_test(output_path, midifile):
+    """
+    Builds a dataset based on the bars extracted from a single song
+    """
+    all_bars = np.array(get_midi_bars(midifile))
+    with open(output_path, 'wb') as handle:
+        pickle.dump(all_bars, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
 def load_dataset(dataset_path):
+    """
+    Loads the bars from a given dataset pickle
+    """
     with open(dataset_path, 'rb') as handle:
         all_bars = pickle.load(handle)
         return all_bars
@@ -132,6 +154,7 @@ def generate_bars(bars, output_midi, output_tempo=100):
 def generate_bar(bar, output_midi, output_tempo=100):
     # Expand flattened representation into piano roll
     bar = np.reshape(bar,(NUM_NOTES, BAR_QUANT))
+    visualize_bar(bar)
     generate_midi(bar, output_midi, output_tempo)
 
 def generate_midi(roll, output_midi, output_tempo=100):
@@ -161,7 +184,7 @@ def generate_midi(roll, output_midi, output_tempo=100):
 
         # Use time + 1 because of padding above
         velocity = roll[pitch, time + 1]
-        time = time / output_tempo
+        time = time / float(output_tempo)
         if velocity > 0:
             if prev_velocities[pitch] == 0:
                 note_on_time[pitch] = time
@@ -179,7 +202,8 @@ def generate_midi(roll, output_midi, output_tempo=100):
     # synth = midi.synthesize(fs=16000)
     midi.write(output_midi)
 
-def play_for(sample_wave, ms):
+
+def play_wav(sample_wave, ms):
     """Play the given NumPy array, as a sound, for ms milliseconds."""
     sound = pygame.sndarray.make_sound(sample_wave)
     sound.play(-1)
@@ -189,4 +213,16 @@ def play_for(sample_wave, ms):
 if __name__ == "__main__":
     # # pygame.init()
     # pygame.mixer.init(44100, -16,1,2048)
-    construct_dataset('data/test_dataset.p', '/Users/catalin/Downloads/lmd_full', nsamples=100)
+    pass
+
+    port = mido.open_output('New Port', virtual=True, client_name="Neural-DJ") # mido.open_output('TiMidity:TiMidity port 0 128:0')
+    
+
+    while(True):
+        port.send(mido.Message('note_on', note=72))
+        print("beep")
+        sleep(1)
+
+    # construct_dataset('data/dataset_100.p', '/Users/catalin/Downloads/lmd_full', nsamples=100)
+    # construct_dataset_1bar_test('data/dataset_1bar.p', 'data/jeopardy.mid')
+    # construct_dataset_1song_test('data/dataset_1song.p', 'data/jeopardy.mid')
