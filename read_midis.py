@@ -7,6 +7,7 @@ import cPickle as pickle
 import matplotlib.pyplot as plt
 import mido
 from time import sleep
+from midi_output import NeuralDJ
 # import librosa.display
 # import pygame, pygame.sndarray
 # np.set_printoptions(threshold=np.nan)
@@ -205,23 +206,21 @@ def generate_midi(roll, output_midi, output_tempo=100):
 
 def play_wav(sample_wave, ms):
     """Play the given NumPy array, as a sound, for ms milliseconds."""
+    # Currently broken
+    # pygame.init()
+    # pygame.mixer.init(44100, -16,1,2048)
     sound = pygame.sndarray.make_sound(sample_wave)
     sound.play(-1)
     pygame.time.delay(ms)
     sound.stop()
 
 if __name__ == "__main__":
-    # # pygame.init()
-    # pygame.mixer.init(44100, -16,1,2048)
-    pass
-
-    port = mido.open_output('New Port', virtual=True, client_name="Neural-DJ") # mido.open_output('TiMidity:TiMidity port 0 128:0')
-    
-
-    while(True):
-        port.send(mido.Message('note_on', note=72))
-        print("beep")
-        sleep(1)
+    dj = NeuralDJ(NUM_NOTES, BAR_QUANT, ROLL_WINDOW)
+    dj.start_playback()
+    all_bars = get_midi_bars('data/jeopardy.mid')
+    for bar in all_bars:
+        dj.add_bar(bar)
+    dj.finish_playback()
 
     # construct_dataset('data/dataset_100.p', '/Users/catalin/Downloads/lmd_full', nsamples=100)
     # construct_dataset_1bar_test('data/dataset_1bar.p', 'data/jeopardy.mid')

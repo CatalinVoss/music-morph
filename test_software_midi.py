@@ -5,9 +5,10 @@ from midi_output import NeuralDJ
 
 NUM_NOTES = 24
 BAR_QUANT = 64
+ROLL_WINDOW = (47,71) # Middle C is 60
 
 if __name__ == "__main__":
-    dj = NeuralDJ(NUM_NOTES, BAR_QUANT)
+    dj = NeuralDJ(NUM_NOTES, BAR_QUANT, ROLL_WINDOW)
 
     arr = np.array([])
     dj.start_playback()
