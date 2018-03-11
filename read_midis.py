@@ -61,6 +61,25 @@ def construct_dataset(output_path, datadir, nsamples=None):
     with open(output_path, 'wb') as handle:
         pickle.dump(all_bars, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
+def construct_dataset_1bar_test(output_path, midifile):
+    """
+    Builds a dataset with a single bar
+    """
+    all_bars = np.array(get_midi_bars(midifile))
+    print(all_bars.shape)
+    all_bars = [all_bars[10]] # jeopardy...
+    generate_bar(all_bars[0], "test.mid")
+    with open(output_path, 'wb') as handle:
+        pickle.dump(all_bars, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+def construct_dataset_1song_test(output_path, midifile):
+    """
+    Builds a dataset based on the bars extracted from a single song
+    """
+    all_bars = np.array(get_midi_bars(midifile))
+    with open(output_path, 'wb') as handle:
+        pickle.dump(all_bars, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
 def load_dataset(dataset_path):
     """
     Loads the bars from a given dataset pickle
