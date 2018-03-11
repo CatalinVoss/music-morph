@@ -202,7 +202,8 @@ def generate_midi(roll, output_midi, output_tempo=100):
     # synth = midi.synthesize(fs=16000)
     midi.write(output_midi)
 
-def play_for(sample_wave, ms):
+
+def play_wav(sample_wave, ms):
     """Play the given NumPy array, as a sound, for ms milliseconds."""
     sound = pygame.sndarray.make_sound(sample_wave)
     sound.play(-1)
