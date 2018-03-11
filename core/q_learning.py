@@ -14,6 +14,7 @@ from utils.wrappers import PreproWrapper, MaxAndSkipEnv
 
 import rewards as rewards_env
 import read_midis
+DISPLAY_FREQ=1000
 class QN(object):
     """
     Abstract Class for implementing a Q Network
@@ -39,6 +40,7 @@ class QN(object):
         self.midi_gold = read_midis.load_dataset("data/test_dataset.p")
         #[rewards_env.midify(rewards_env.random_state(), flat=True) for i in range(0, 1000)]
         self.midi_gold = np.array(self.midi_gold[0:1])
+        #self.midi_gold = np.zeros((1, 16))
         print self.midi_gold.shape
         # build model
         self.build()
@@ -194,7 +196,7 @@ class QN(object):
 
                 # perform action in env
                 #print t
-                new_state, reward, done, info = rewards_env.env_step(self.midi_gold, action, state, display=(t % 1000 == 0))
+                new_state, reward, done, info = rewards_env.env_step(self.midi_gold, action, state, display=(t % DISPLAY_FREQ == 0))
 
                 # store the transition
                 replay_buffer.store_effect(idx, action, reward, done)
