@@ -66,9 +66,7 @@ def construct_dataset_1bar_test(output_path, midifile):
     Builds a dataset with a single bar
     """
     all_bars = np.array(get_midi_bars(midifile))
-    print(all_bars.shape)
     all_bars = [all_bars[10]] # jeopardy...
-    generate_bar(all_bars[0], "test.mid")
     with open(output_path, 'wb') as handle:
         pickle.dump(all_bars, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -212,8 +210,7 @@ def play_for(sample_wave, ms):
 if __name__ == "__main__":
     # # pygame.init()
     # pygame.mixer.init(44100, -16,1,2048)
-
+    
     # construct_dataset('data/dataset_100.p', '/Users/catalin/Downloads/lmd_full', nsamples=100)
-
-    construct_dataset_1bar_test('data/dataset_1bar.p', 'data/jeopardy.mid')
+    # construct_dataset_1bar_test('data/dataset_1bar.p', 'data/jeopardy.mid')
     # construct_dataset_1song_test('data/dataset_1song.p', 'data/jeopardy.mid')
