@@ -210,7 +210,8 @@ def play_for(sample_wave, ms):
 if __name__ == "__main__":
     # # pygame.init()
     # pygame.mixer.init(44100, -16,1,2048)
-    
+    pass
+
     # construct_dataset('data/dataset_100.p', '/Users/catalin/Downloads/lmd_full', nsamples=100)
     # construct_dataset_1bar_test('data/dataset_1bar.p', 'data/jeopardy.mid')
     # construct_dataset_1song_test('data/dataset_1song.p', 'data/jeopardy.mid')
