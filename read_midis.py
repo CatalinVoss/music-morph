@@ -62,6 +62,9 @@ def construct_dataset(output_path, datadir, nsamples=None):
         pickle.dump(all_bars, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 def load_dataset(dataset_path):
+    """
+    Loads the bars from a given dataset pickle
+    """
     with open(dataset_path, 'rb') as handle:
         all_bars = pickle.load(handle)
         return all_bars
