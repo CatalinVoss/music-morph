@@ -15,7 +15,7 @@ NUM_NOTES = 24
 # How many steps we want to quantize a bar into
 BAR_QUANT = 64
 
-BAR_NOTES_THRESH = 40
+BAR_NOTES_THRESH = 10
 BAR_KEYS_THRESH = 2
 
 # MIDI constants
@@ -154,6 +154,7 @@ def generate_bars(bars, output_midi, output_tempo=100):
 def generate_bar(bar, output_midi, output_tempo=100):
     # Expand flattened representation into piano roll
     bar = np.reshape(bar,(NUM_NOTES, BAR_QUANT))
+    visualize_bar(bar)
     generate_midi(bar, output_midi, output_tempo)
 
 def generate_midi(roll, output_midi, output_tempo=100):
@@ -211,4 +212,8 @@ def play_for(sample_wave, ms):
 if __name__ == "__main__":
     # # pygame.init()
     # pygame.mixer.init(44100, -16,1,2048)
-    construct_dataset('data/test_dataset.p', '/Users/catalin/Downloads/lmd_full', nsamples=100)
+
+    # construct_dataset('data/dataset_100.p', '/Users/catalin/Downloads/lmd_full', nsamples=100)
+
+    construct_dataset_1bar_test('data/dataset_1bar.p', 'data/jeopardy.mid')
+    # construct_dataset_1song_test('data/dataset_1song.p', 'data/jeopardy.mid')
