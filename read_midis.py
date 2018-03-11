@@ -5,6 +5,8 @@ import os.path
 import random
 import cPickle as pickle
 import matplotlib.pyplot as plt
+import mido
+from time import sleep
 # import librosa.display
 # import pygame, pygame.sndarray
 # np.set_printoptions(threshold=np.nan)
@@ -211,6 +213,14 @@ if __name__ == "__main__":
     # # pygame.init()
     # pygame.mixer.init(44100, -16,1,2048)
     pass
+
+    port = mido.open_output('New Port', virtual=True, client_name="Neural-DJ") # mido.open_output('TiMidity:TiMidity port 0 128:0')
+    
+
+    while(True):
+        port.send(mido.Message('note_on', note=72))
+        print("beep")
+        sleep(1)
 
     # construct_dataset('data/dataset_100.p', '/Users/catalin/Downloads/lmd_full', nsamples=100)
     # construct_dataset_1bar_test('data/dataset_1bar.p', 'data/jeopardy.mid')
