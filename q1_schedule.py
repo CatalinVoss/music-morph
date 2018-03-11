@@ -77,7 +77,7 @@ class LinearExploration(LinearSchedule):
         ################ YOUR CODE HERE - 4-5 lines ##################
         rand_num = np.random.random()
         if (rand_num <= self.epsilon):
-            sample = np.random.randint(0, rewards.NUM_OCCURENCES * rewards.NUM_NOTES)
+            sample = np.random.randint(0, rewards.NUM_ACTIONS)
             return sample
         else:
             return best_action

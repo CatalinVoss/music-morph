@@ -22,7 +22,6 @@ class Linear(DQN):
         (so we can use different batch sizes without rebuilding the model
         """
         # this information might be useful
-        # here, typically, a state shape is (80, 80, 1)
         state_shape = [rewards.NUM_NOTES, rewards.NUM_OCCURENCES, 1]
 
         ##############################################################
@@ -78,7 +77,7 @@ class Linear(DQN):
             out: (tf tensor) of shape = (batch_size, num_actions)
         """
         # this information might be useful
-        num_actions = rewards.NUM_NOTES * rewards.NUM_OCCURENCES
+        num_actions = rewards.NUM_ACTIONS
         out = state
 
         ##############################################################
@@ -99,12 +98,16 @@ class Linear(DQN):
               lasagne, cafe, etc.)
         """
         ##############################################################
-        ################ YOUR CODE HERE - 2-3 lines ################## 
-        s_flattened = tf.contrib.layers.flatten(out, scope=scope)
-        out = tf.contrib.layers.fully_connected(s_flattened, 
-                                                num_actions,
-                                                activation_fn=None,
-                                                scope=scope)
+        ################ YOUR CODE HERE - 2-3 lines ##################
+        with tf.variable_scope(scope, reuse=reuse):
+            s_flattened = tf.contrib.layers.flatten(out)
+            hidden_layer = tf.contrib.layers.fully_connected(s_flattened,
+                                                             1024,
+                                                             activation_fn=tf.nn.relu)
+            
+            out = tf.contrib.layers.fully_connected(hidden_layer, 
+                                                    num_actions,
+                                                    activation_fn=None)
         ##############################################################
         ######################## END YOUR CODE #######################
         return out
@@ -166,7 +169,7 @@ class Linear(DQN):
             target_q: (tf tensor) shape = (batch_size, num_actions)
         """
         # you may need this variable
-        num_actions = rewards.NUM_NOTES * rewards.NUM_OCCURENCES
+        num_actions = rewards.NUM_ACTIONS
 
         ##############################################################
         """

@@ -1,5 +1,5 @@
 import numpy as np
-
+import matplotlib.pyplot as plt
 #The possible notes on the launchpad
 NOTES = range(24)
 NUM_NOTES = len(NOTES)
@@ -16,7 +16,7 @@ POW_OF_2 = 6
 BARLENGTH = 2**POW_OF_2
 
 NUM_ACTIONS = NUM_NOTES*BEAT_TYPES + NUM_NOTES*POW_OF_2
-
+EPISODE_LENGTH = 10
 #The amount to sample from the midi dataset when calculating rewards
 SUBSAMPLE = 1000
 
@@ -26,7 +26,7 @@ def env_reset():
     global frame_count
     frame_count = 0
     #print "resetting"
-    return random_state()
+    return random_state(False)
 
 
 def random_state(full=True):
@@ -65,7 +65,7 @@ def midify(state, flat=False):
     else:
         return bar
 
-def reward(midi_dataset, state):
+def reward(midi_dataset, state, display=False):
     """
     Given the MIDI dataset in the format of FLATTENED "numeric MIDI", array of shape (NUM_SAMPLES, notes*bars)
     compute the reward of a state as follows:
@@ -75,7 +75,18 @@ def reward(midi_dataset, state):
         * compute the difference squared between the state midi and the dataset midis
         * return the negative of the minimal difference squared (difference squared from the closest sample)
     """
+    
     midi_state = midify(state, flat=True)
+    if display:
+        print "midi gold"
+        print midi_dataset
+        print "midified state"
+        sample_state = midify(state, flat=False)
+        print sample_state
+        f, axarr = plt.subplots(2, sharex=True)
+        axarr[0].matshow(sample_state)
+        axarr[1].matshow(midi_dataset[0].reshape(sample_state.shape))
+        plt.show()
     (dataset_length, midi_length) = midi_dataset.shape
     assert midi_length == len(midi_state)
     if dataset_length < SUBSAMPLE:
@@ -102,9 +113,10 @@ def toggle(action, state):
         note_to_change = action/POW_OF_2
         state[note_to_change,-1] = (state[note_to_change,-1] + change) % BARLENGTH
     return state
-def env_step(midigold, action, state):
+
+def env_step(midigold, action, state, display=False):
     global frame_count
     frame_count += 1
     #print frame_count
     state = toggle(action, state)
-    return state, reward(midigold, state), frame_count == 10, None
+    return state, reward(midigold, state, display), frame_count == EPISODE_LENGTH, None

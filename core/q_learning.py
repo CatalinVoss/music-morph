@@ -38,7 +38,7 @@ class QN(object):
         self.env = env
         self.midi_gold = read_midis.load_dataset("data/test_dataset.p")
         #[rewards_env.midify(rewards_env.random_state(), flat=True) for i in range(0, 1000)]
-        self.midi_gold = np.array(self.midi_gold)
+        self.midi_gold = np.array(self.midi_gold[0:1])
         print self.midi_gold.shape
         # build model
         self.build()
@@ -193,7 +193,8 @@ class QN(object):
                 q_values += list(q_values)
 
                 # perform action in env
-                new_state, reward, done, info = rewards_env.env_step(self.midi_gold, action, state)
+                #print t
+                new_state, reward, done, info = rewards_env.env_step(self.midi_gold, action, state, display=(t % 1000 == 0))
 
                 # store the transition
                 replay_buffer.store_effect(idx, action, reward, done)
@@ -208,11 +209,11 @@ class QN(object):
                 # logging stuff
                 if ((t > self.config.learning_start) and (t % self.config.log_freq == 0) and
                    (t % self.config.learning_freq == 0)):
-                    self.update_averages(rewards, max_q_values, q_values, scores_eval)
                     exp_schedule.update(t)
                     lr_schedule.update(t)
-                    
                     if len(rewards) > 0:
+                        self.update_averages(rewards, max_q_values, q_values, scores_eval)
+
                         prog.update(t + 1, exact=[("Loss", loss_eval), ("Avg R", self.avg_reward), 
                                         ("Max R", np.max(rewards)), ("eps", exp_schedule.epsilon), 
                                         ("Grads", grad_eval), ("Max Q", self.max_q), 
@@ -297,6 +298,7 @@ class QN(object):
         for i in range(num_episodes):
             total_reward = 0
             state = rewards_env.env_reset()
+            t = 0
             while True:
                 if self.config.render_test: env.render()
 
@@ -307,7 +309,7 @@ class QN(object):
                 action = self.get_action(q_input)
 
                 # perform action in env
-                new_state, reward, done, _ = rewards_env.env_step(self.midi_gold, action, state)
+                new_state, reward, done, _ = rewards_env.env_step(self.midi_gold, action, state, False)
 
                 # store in replay memory
                 replay_buffer.store_effect(idx, action, reward, done)
@@ -317,7 +319,7 @@ class QN(object):
                 total_reward += reward
                 if done:
                     break
-
+                t += 1
             # updates to perform at the end of an episode
             rewards.append(total_reward)     
 

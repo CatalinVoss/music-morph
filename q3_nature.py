@@ -30,7 +30,7 @@ class NatureQN(Linear):
             out: (tf tensor) of shape = (batch_size, num_actions)
         """
         # this information might be useful
-        num_actions = rewards.NUM_NOTES * rewards.NUM_OCCURENCES
+        num_actions = rewards.NUM_ACTIONS
         out = state
         print out.shape
         ##############################################################
