@@ -18,7 +18,7 @@ NUM_NOTES = 24
 # How many steps we want to quantize a bar into
 BAR_QUANT = 64
 
-BAR_NOTES_THRESH = 10
+BAR_NOTES_THRESH = 20
 BAR_KEYS_THRESH = 2
 
 # MIDI constants
@@ -215,13 +215,15 @@ def play_wav(sample_wave, ms):
     sound.stop()
 
 if __name__ == "__main__":
-    dj = NeuralDJ(NUM_NOTES, BAR_QUANT, ROLL_WINDOW)
-    dj.start_playback()
-    all_bars = get_midi_bars('data/jeopardy.mid')
-    for bar in all_bars:
-        dj.add_bar(bar)
-    dj.finish_playback()
+    # dj = NeuralDJ(NUM_NOTES, BAR_QUANT, ROLL_WINDOW)
+    # dj.start_playback()
+    # all_bars = get_midi_bars('data/jeopardy.mid')
+    # for bar in all_bars:
+    #     dj.add_bar(bar)
+    # dj.finish_playback()
 
     # construct_dataset('data/dataset_100.p', '/Users/catalin/Downloads/lmd_full', nsamples=100)
     # construct_dataset_1bar_test('data/dataset_1bar.p', 'data/jeopardy.mid')
     # construct_dataset_1song_test('data/dataset_1song.p', 'data/jeopardy.mid')
+
+    construct_dataset('data/large.p', 'data/lmd_full', nsamples=20000)
