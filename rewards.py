@@ -15,11 +15,11 @@ NUM_OCCURENCES = len(OCCURENCES)
 BEAT_TYPES = NUM_OCCURENCES - 1
 
 #The length of the generated bar
-POW_OF_2 = 6
+POW_OF_2 = 6 #6
 BARLENGTH = 2**POW_OF_2
 
 NUM_ACTIONS = NUM_NOTES*BEAT_TYPES + NUM_NOTES*POW_OF_2
-EPISODE_LENGTH = 1
+EPISODE_LENGTH = 100
 #The amount to sample from the midi dataset when calculating rewards
 SUBSAMPLE = 1000
 
@@ -106,6 +106,8 @@ def reward(midi_dataset, state, display=False):
         
         plt.show()
     (dataset_length, midi_length) = midi_dataset.shape
+    #print midi_dataset.shape
+    #print len(midi_state)
     assert midi_length == len(midi_state)
     # print "dataset_length = " + str(dataset_length)
     # print "SUBSAMPLE = " + str(SUBSAMPLE)
