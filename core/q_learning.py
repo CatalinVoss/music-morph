@@ -37,13 +37,11 @@ class QN(object):
         if logger is None:
             self.logger = get_logger(config.log_path)
         self.env = env
-        self.midi_gold = read_midis.load_dataset("data/test_dataset.p")
+        self.midi_gold = read_midis.load_dataset("data/dataset_1bar.p")
         #[rewards_env.midify(rewards_env.random_state(), flat=True) for i in range(0, 1000)]
+
         self.midi_gold = np.array(self.midi_gold[0:1]) > 0
         self.midi_gold.astype(np.float64)
-        #self.midi_gold = np.zeros((1, 16))
-        #print self.midi_gold.shape
-        # build model
         self.build()
 
 

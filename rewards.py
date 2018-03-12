@@ -29,7 +29,7 @@ def env_reset():
     return random_state(False)
 
 
-def random_state(full=True):
+def random_state(full=True, output_onehot=True):
     """
     Debugging function for generating a random state where all buttons are pressed with prob. 1/2 (default)
     or generate a random state where exactly one button is pressed (full=False)
@@ -37,12 +37,27 @@ def random_state(full=True):
     """
     if full:
         res = np.int32(np.random.rand(NUM_NOTES, NUM_OCCURENCES) > 0.5)
-        res[:, -1] = np.random.randint(BARLENGTH, size=NUM_NOTES)
-        return res
+        res[:, -1] = np.random.randint(BARLENGTH, size=NUM_NOTES, dtype=np.int32)
     else:
         res = np.zeros((NUM_NOTES, NUM_OCCURENCES), dtype=np.int32)
         res.flat[np.random.randint(NUM_NOTES*NUM_OCCURENCES)] = 1
+    if output_onehot:
+        return to_onehot(res)
+    else:
         return res
+
+def to_onehot(state, complete=False):
+    state = state.astype(int)
+    buttons = state[:,:-1]
+    offsets = state[:,-1]
+    one_hot_offsets = np.eye(BARLENGTH)[offsets]
+    return np.concatenate([buttons, one_hot_offsets],1)
+
+def undo_onehot(state, complete=False):
+    buttons = state[:,:(NUM_OCCURENCES-1)]
+    one_hot_offsets = state[:,(NUM_OCCURENCES-1):]
+    offsets = np.where(one_hot_offsets==1)[1]
+    return np.concatenate([buttons, offsets[:,None]],1)
 
 def midify(state, flat=False):
     """
@@ -50,7 +65,8 @@ def midify(state, flat=False):
     The "numeric MIDI" array has shape (notes, bars)
     set flat=True to get shape (notes*bars,) as a flat array
     """
-    bar = np.zeros((NUM_NOTES, BARLENGTH))
+    state = state.astype(int)
+    bar = np.zeros((NUM_NOTES, BARLENGTH), dtype=np.int32)
     for i_n, n in enumerate(NOTES):
         for i_o, o in enumerate(OCCURENCES):
             if state[i_n,i_o] > 0:
@@ -75,7 +91,6 @@ def reward(midi_dataset, state, display=False):
         * compute the difference squared between the state midi and the dataset midis
         * return the negative of the minimal difference squared (difference squared from the closest sample)
     """
-    
     midi_state = midify(state, flat=True)
     if display:
         print "midi gold"
@@ -125,12 +140,11 @@ def toggle(action, state):
         state[note_to_change,-1] = (state[note_to_change,-1] + change) % BARLENGTH
     return state
 
-def env_step(midigold, action, state, display=False):
+def env_step(midigold, action, state_onehot, display=False):
+    state = undo_onehot(state_onehot)
     global frame_count
     frame_count += 1
     #print frame_count
     #print "midigold shape " + str(midigold.shape)
     state = toggle(action, state)
-    rew = reward(midigold, state, display)
-    #print rew
-    return state, rew, frame_count == EPISODE_LENGTH, None
+    return to_onehot(state), reward(midigold, state, display), frame_count == EPISODE_LENGTH, None)
