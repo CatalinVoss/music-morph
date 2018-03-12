@@ -19,7 +19,7 @@ POW_OF_2 = 6
 BARLENGTH = 2**POW_OF_2
 
 NUM_ACTIONS = NUM_NOTES*BEAT_TYPES + NUM_NOTES*POW_OF_2
-EPISODE_LENGTH = 10
+EPISODE_LENGTH = 1
 #The amount to sample from the midi dataset when calculating rewards
 SUBSAMPLE = 1000
 
@@ -29,9 +29,9 @@ def env_reset():
     global frame_count
     frame_count = 0
     #print "resetting"
-    return random_state(True)
+    return random_state(False)
 
-def random_state(full=True):
+def random_state(full=True, output_onehot=True):
     """
     Debugging function for generating a random state where all buttons are pressed with prob. 1/2 (default)
     or generate a random state where exactly one button is pressed (full=False)
@@ -39,12 +39,27 @@ def random_state(full=True):
     """
     if full:
         res = np.int32(np.random.rand(NUM_NOTES, NUM_OCCURENCES) > 0.5)
-        res[:, -1] = np.random.randint(BARLENGTH, size=NUM_NOTES)
-        return res
+        res[:, -1] = np.random.randint(BARLENGTH, size=NUM_NOTES, dtype=np.int32)
     else:
         res = np.zeros((NUM_NOTES, NUM_OCCURENCES), dtype=np.int32)
         res.flat[np.random.randint(NUM_NOTES*NUM_OCCURENCES)] = 1
+    if output_onehot:
+        return to_onehot(res)
+    else:
         return res
+
+def to_onehot(state, complete=False):
+    state = state.astype(int)
+    buttons = state[:,:-1]
+    offsets = state[:,-1]
+    one_hot_offsets = np.eye(BARLENGTH)[offsets]
+    return np.concatenate([buttons, one_hot_offsets],1)
+
+def undo_onehot(state, complete=False):
+    buttons = state[:,:(NUM_OCCURENCES-1)]
+    one_hot_offsets = state[:,(NUM_OCCURENCES-1):]
+    offsets = np.where(one_hot_offsets==1)[1]
+    return np.concatenate([buttons, offsets[:,None]],1)
 
 def midify(state, flat=False):
     """
@@ -52,7 +67,8 @@ def midify(state, flat=False):
     The "numeric MIDI" array has shape (notes, bars)
     set flat=True to get shape (notes*bars,) as a flat array
     """
-    bar = np.zeros((NUM_NOTES, BARLENGTH))
+    state = state.astype(int)
+    bar = np.zeros((NUM_NOTES, BARLENGTH), dtype=np.int32)
     for i_n, n in enumerate(NOTES):
         for i_o, o in enumerate(OCCURENCES):
             if state[i_n,i_o] > 0:
@@ -77,7 +93,6 @@ def reward(midi_dataset, state, display=False):
         * compute the difference squared between the state midi and the dataset midis
         * return the negative of the minimal difference squared (difference squared from the closest sample)
     """
-    
     midi_state = midify(state, flat=True)
     if display:
         print "midi gold"
@@ -92,12 +107,22 @@ def reward(midi_dataset, state, display=False):
         plt.show()
     (dataset_length, midi_length) = midi_dataset.shape
     assert midi_length == len(midi_state)
+    # print "dataset_length = " + str(dataset_length)
+    # print "SUBSAMPLE = " + str(SUBSAMPLE)
     if dataset_length < SUBSAMPLE:
         compare = midi_dataset
     else:
         inds = np.random.choice(dataset_length, SUBSAMPLE, replace=False)
+        #print inds
         compare = midi_dataset[inds,:]
     diff = compare - midi_state
+    # print "the diff" + str(diff.shape)
+    # print "the compare shape" + str(compare.shape)
+    # print "the midi_state shape" + str(midi_state.shape)
+    # print "compare sum" + str(np.sum(compare))
+    # print compare
+    # print "current state sum " + str(np.sum(midi_state))
+    # print "the diff sum" + str(np.sum(np.abs(diff)))
     return -np.min(np.sum(diff**2,1))
 
 
@@ -117,12 +142,14 @@ def toggle(action, state):
         state[note_to_change,-1] = (state[note_to_change,-1] + change) % BARLENGTH
     return state
 
-def env_step(midigold, action, state, display=False):
+def env_step(midigold, action, state_onehot, display=False):
+    state = undo_onehot(state_onehot)
     global frame_count
     frame_count += 1
     #print frame_count
+    #print "midigold shape " + str(midigold.shape)
     state = toggle(action, state)
-    return state, reward(midigold, state, display), frame_count == EPISODE_LENGTH, None
+    return to_onehot(state), reward(midigold, state, display), frame_count == EPISODE_LENGTH, None)
 
 
 if __name__ == '__main__':

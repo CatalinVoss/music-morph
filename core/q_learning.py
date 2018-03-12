@@ -14,9 +14,10 @@ from utils.wrappers import PreproWrapper, MaxAndSkipEnv
 
 import rewards as rewards_env
 import read_midis
+<<<<<<< HEAD
 from midi_output import NeuralDJ
 
-DISPLAY_FREQ=1000
+DISPLAY_FREQ=5000
 class QN(object):
     """
     Abstract Class for implementing a Q Network
