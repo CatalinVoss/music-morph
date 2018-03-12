@@ -7,7 +7,7 @@ NUM_NOTES = len(NOTES)
 #The possible occurences on the launchpad
 #If the occurence 'm' is turned on, it adds a one to the note track every m timesteps
 #0 represents the offset for that note, the offset can be any number from 0 to 63 (do a mod)
-OCCURENCES = [1, 2, 4, 8, 16, 32, 64, 0]
+OCCURENCES = [1, 2, 4, 8, 16, 32, 64, 0] # 1 2 4 8 16
 NUM_OCCURENCES = len(OCCURENCES)
 BEAT_TYPES = NUM_OCCURENCES - 1
 
@@ -26,7 +26,7 @@ def env_reset():
     global frame_count
     frame_count = 0
     #print "resetting"
-    return random_state(False)
+    return random_state(True)
 
 
 def random_state(full=True):
@@ -84,8 +84,9 @@ def reward(midi_dataset, state, display=False):
         sample_state = midify(state, flat=False)
         print sample_state
         f, axarr = plt.subplots(2, sharex=True)
-        axarr[0].matshow(sample_state)
-        axarr[1].matshow(midi_dataset[0].reshape(sample_state.shape))
+        axarr[0].matshow(sample_state, vmin=0, vmax=1)
+        axarr[1].matshow(midi_dataset[0].reshape(sample_state.shape), vmin=0, vmax=1)
+        
         plt.show()
     (dataset_length, midi_length) = midi_dataset.shape
     assert midi_length == len(midi_state)
