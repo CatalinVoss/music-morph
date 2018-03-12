@@ -172,6 +172,8 @@ class DQN(QN):
         """
         
         action_values = self.sess.run(self.q, feed_dict={self.s: [state]})[0]
+        #print action_values
+        #print np.argmax(action_values)
         return np.argmax(action_values), action_values
 
 
