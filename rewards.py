@@ -1,5 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import read_midis
+from midi_output import NeuralDJ
+
 #The possible notes on the launchpad
 NOTES = range(24)
 NUM_NOTES = len(NOTES)
@@ -27,7 +30,6 @@ def env_reset():
     frame_count = 0
     #print "resetting"
     return random_state(True)
-
 
 def random_state(full=True):
     """
@@ -121,3 +123,25 @@ def env_step(midigold, action, state, display=False):
     #print frame_count
     state = toggle(action, state)
     return state, reward(midigold, state, display), frame_count == EPISODE_LENGTH, None
+
+
+if __name__ == '__main__':
+    state = np.zeros((NUM_NOTES, NUM_OCCURENCES))
+    state[0,2] = 1
+    bar = midify(state).astype(np.int32)
+    read_midis.visualize_bar(bar)
+
+    dataset = np.array([np.ravel(bar)])
+    print(dataset.shape)
+    print(reward(dataset, state))
+
+    # bar = np.ravel(midify(random_state())).astype(np.int32)*40
+    # print(bar)
+    # dj = NeuralDJ(NUM_NOTES, read_midis.BAR_QUANT, read_midis.ROLL_WINDOW)
+    # dj.add_bar(bar)
+    # dj.add_bar(bar)
+    # dj.add_bar(bar)
+    # dj.add_bar(bar)
+    # dj.add_bar(bar)
+    # dj.add_bar(bar)
+    # dj.start_playback()
