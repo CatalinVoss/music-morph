@@ -149,7 +149,7 @@ def env_step(midigold, action, state_onehot, display=False):
     #print frame_count
     #print "midigold shape " + str(midigold.shape)
     state = toggle(action, state)
-    return to_onehot(state), reward(midigold, state, display), frame_count == EPISODE_LENGTH, None)
+    return (to_onehot(state), reward(midigold, state, display), frame_count == EPISODE_LENGTH, None)
 
 
 if __name__ == '__main__':
