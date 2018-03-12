@@ -14,6 +14,8 @@ from utils.wrappers import PreproWrapper, MaxAndSkipEnv
 
 import rewards as rewards_env
 import read_midis
+from midi_output import NeuralDJ
+
 DISPLAY_FREQ=5000
 class QN(object):
     """
@@ -37,6 +39,7 @@ class QN(object):
         if logger is None:
             self.logger = get_logger(config.log_path)
         self.env = env
+
         self.midi_gold = read_midis.load_dataset("data/dataset_100.p")
         #[rewards_env.midify(rewards_env.random_state(), flat=True) for i in range(0, 1000)]
         #self.midi_gold = np.zeros((1, 8))
@@ -44,6 +47,7 @@ class QN(object):
         self.midi_gold = self.midi_gold.astype(np.float64)
         #self.midi_gold *= 0
         #self.midi_gold += 1
+
         self.build()
 
 
