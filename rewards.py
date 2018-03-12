@@ -16,7 +16,7 @@ POW_OF_2 = 6
 BARLENGTH = 2**POW_OF_2
 
 NUM_ACTIONS = NUM_NOTES*BEAT_TYPES + NUM_NOTES*POW_OF_2
-EPISODE_LENGTH = 10
+EPISODE_LENGTH = 1
 #The amount to sample from the midi dataset when calculating rewards
 SUBSAMPLE = 1000
 
@@ -26,7 +26,7 @@ def env_reset():
     global frame_count
     frame_count = 0
     #print "resetting"
-    return random_state(True)
+    return random_state(False)
 
 
 def random_state(full=True):
@@ -90,12 +90,22 @@ def reward(midi_dataset, state, display=False):
         plt.show()
     (dataset_length, midi_length) = midi_dataset.shape
     assert midi_length == len(midi_state)
+    # print "dataset_length = " + str(dataset_length)
+    # print "SUBSAMPLE = " + str(SUBSAMPLE)
     if dataset_length < SUBSAMPLE:
         compare = midi_dataset
     else:
         inds = np.random.choice(dataset_length, SUBSAMPLE, replace=False)
+        #print inds
         compare = midi_dataset[inds,:]
     diff = compare - midi_state
+    # print "the diff" + str(diff.shape)
+    # print "the compare shape" + str(compare.shape)
+    # print "the midi_state shape" + str(midi_state.shape)
+    # print "compare sum" + str(np.sum(compare))
+    # print compare
+    # print "current state sum " + str(np.sum(midi_state))
+    # print "the diff sum" + str(np.sum(np.abs(diff)))
     return -np.min(np.sum(diff**2,1))
 
 
@@ -119,5 +129,8 @@ def env_step(midigold, action, state, display=False):
     global frame_count
     frame_count += 1
     #print frame_count
+    #print "midigold shape " + str(midigold.shape)
     state = toggle(action, state)
-    return state, reward(midigold, state, display), frame_count == EPISODE_LENGTH, None
+    rew = reward(midigold, state, display)
+    #print rew
+    return state, rew, frame_count == EPISODE_LENGTH, None

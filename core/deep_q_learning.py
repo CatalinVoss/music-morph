@@ -187,16 +187,16 @@ class DQN(QN):
             loss: (Q - Q_target)^2
         """
         
-        s_batch = [rewards.random_state() for i in range(0, self.config.batch_size)]
-        s_batch = np.array(s_batch)
-        sp_batch = [rewards.random_state() for i in range(0, self.config.batch_size)]
-        midified = [rewards.midify(rewards.random_state(), flat=True) for s in range(0, self.config.batch_size)]
-        midified = np.array(midified)
-        r_batch = [rewards.reward(midified, s) for s in s_batch]
-        a_batch = [2 for i in range(0, self.config.batch_size)]
-        done_mask_batch = [False for _ in range(0, self.config.batch_size)]
-        #s_batch, a_batch, r_batch, sp_batch, done_mask_batch = replay_buffer.sample(
-        #    self.config.batch_size)
+        #s_batch = [rewards.random_state() for i in range(0, self.config.batch_size)]
+        #s_batch = np.array(s_batch)
+        #sp_batch = [rewards.random_state() for i in range(0, self.config.batch_size)]
+        #midified = [rewards.midify(rewards.random_state(), flat=True) for s in range(0, self.config.batch_size)]
+        #midified = np.array(midified)
+        #r_batch = [rewards.reward(midified, s) for s in s_batch]
+        #a_batch = [2 for i in range(0, self.config.batch_size)]
+        #done_mask_batch = [False for _ in range(0, self.config.batch_size)]
+        s_batch, a_batch, r_batch, sp_batch, done_mask_batch = replay_buffer.sample(
+            self.config.batch_size)
 
 
         fd = {

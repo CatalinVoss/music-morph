@@ -14,7 +14,7 @@ from utils.wrappers import PreproWrapper, MaxAndSkipEnv
 
 import rewards as rewards_env
 import read_midis
-DISPLAY_FREQ=1000
+DISPLAY_FREQ=5000
 class QN(object):
     """
     Abstract Class for implementing a Q Network
@@ -39,9 +39,10 @@ class QN(object):
         self.env = env
         self.midi_gold = read_midis.load_dataset("data/test_dataset.p")
         #[rewards_env.midify(rewards_env.random_state(), flat=True) for i in range(0, 1000)]
-        self.midi_gold = np.array(self.midi_gold[0:1])
+        self.midi_gold = np.array(self.midi_gold[0:1]) > 0
+        self.midi_gold.astype(np.float64)
         #self.midi_gold = np.zeros((1, 16))
-        print self.midi_gold.shape
+        #print self.midi_gold.shape
         # build model
         self.build()
 
