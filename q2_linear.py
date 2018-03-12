@@ -22,7 +22,7 @@ class Linear(DQN):
         (so we can use different batch sizes without rebuilding the model
         """
         # this information might be useful
-        state_shape = [rewards.NUM_NOTES, rewards.NUM_OCCURENCES, 1]
+        state_shape = [rewards.NUM_NOTES, rewards.NUM_OCCURENCES - 1 +  rewards.BARLENGTH, 1] #using onehot rep for offset
 
         ##############################################################
         """
@@ -78,6 +78,7 @@ class Linear(DQN):
         """
         # this information might be useful
         num_actions = rewards.NUM_ACTIONS
+        print state.shape
         out = state
 
         ##############################################################
