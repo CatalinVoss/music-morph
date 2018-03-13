@@ -6,6 +6,8 @@ from linear_dqn import Linear
 
 from configs.linear import config
 import rewards
+import read_midis
+import numpy as np
 
 if __name__ == '__main__':
     env = rewards.MusicEnv(midigold=np.array(read_midis.load_dataset("data/dataset_100.p")))
