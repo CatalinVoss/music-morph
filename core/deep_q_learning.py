@@ -91,14 +91,14 @@ class DQN(QN):
         self.add_optimizer_op("q")
 
 
-    def initialize(self):
+    def initialize(self, load_model_path=None):
         """
         Assumes the graph has been constructed
         Creates a tf Session and run initializer of variables
         """
         # create tf session
         self.sess = tf.Session()
-
+            
         # tensorboard stuff
         self.add_summary()
 
@@ -111,7 +111,8 @@ class DQN(QN):
 
         # for saving networks weights
         self.saver = tf.train.Saver()
-
+        if self.config.previous_chkpt is not None:
+            self.load_params(self.config.previous_chkpt)
        
     def add_summary(self):
         """
@@ -152,11 +153,12 @@ class DQN(QN):
         """
         Saves session
         """
-        if not os.path.exists(self.config.model_output):
-            os.makedirs(self.config.model_output)
-
-        self.saver.save(self.sess, self.config.model_output)
-
+        # if not os.path.exists(self.config.model_output):
+        #     os.makedirs(self.config.model_output)
+        print "saving"
+        save_path = self.saver.save(self.sess, self.config.model_output)
+        print save_path
+        
     def load_params(self, model_path):
         """
         Load model parameters from model_path
@@ -165,6 +167,7 @@ class DQN(QN):
             model_path: (string) directory
         """
         # TODO: test
+        print "loading previosly saved params from : " + str(model_path)
         self.saver.restore(self.sess, tf.train.latest_checkpoint(model_path))
 
     def get_best_action(self, state):
