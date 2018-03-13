@@ -202,7 +202,7 @@ class QN(object):
                 # perform action in env
                 #print t
                 # TODO: log displays to tensorboard
-                new_state, reward, done, info = rewards_env.env_step(self.midi_gold, action, state))#, display=(t % DISPLAY_FREQ == 0))
+                new_state, reward, done, info = rewards_env.env_step(self.midi_gold, action, state)#, display=(t % DISPLAY_FREQ == 0))
 
                 # store the transition
                 replay_buffer.store_effect(idx, action, reward, done)
