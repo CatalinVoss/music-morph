@@ -152,6 +152,7 @@ class DQN(QN):
         """
         Saves session
         """
+        print("Saving checkpoint to "+str(self.config.model_output))
         if not os.path.exists(self.config.model_output):
             os.makedirs(self.config.model_output)
 
