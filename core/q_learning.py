@@ -169,7 +169,7 @@ class QN(object):
         q_values = deque(maxlen=1000)
         self.init_averages()
 
-        t = last_eval = last_record = 0 # time control of nb of steps
+        t = last_eval = 0 # time control of nb of steps
         scores_eval = [] # list of scores computed at iteration time
         scores_eval += [self.evaluate()]
         
@@ -184,7 +184,6 @@ class QN(object):
  #               print t
                 t += 1
                 last_eval += 1
-                last_record += 1
 #                print total_reward
                 if self.config.render_train: self.env.render()
                 # replay memory stuff
@@ -245,11 +244,6 @@ class QN(object):
                 last_eval = 0
                 print("")
                 scores_eval += [self.evaluate()]
-
-            if (t > self.config.learning_start) and self.config.record and (last_record > self.config.record_freq):
-                self.logger.info("Recording...")
-                last_record =0
-                self.record()
 
         # last words
         self.logger.info("- Training done.")
