@@ -17,10 +17,10 @@ class config():
     record_path  = output_path + "monitor/"
 
     # model and training config
-    num_episodes_test = 1
+    num_episodes_test = 10
     grad_clip         = True
     clip_val          = 10
-    saving_freq       = 1
+    saving_freq       = 25000
     log_freq          = 50
     eval_freq         = 250000
     record_freq       = 250000
