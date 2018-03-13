@@ -2,7 +2,6 @@ import numpy as np
 from utils.test_env import EnvTest
 import sys
 sys.path.append('..')
-import rewards
 
 class LinearSchedule(object):
     def __init__(self, eps_begin, eps_end, nsteps):
@@ -59,7 +58,7 @@ class LinearExploration(LinearSchedule):
         if (rand_num <= self.epsilon):
             print self.epsilon
             print "e-greedy"
-            sample = np.random.randint(0, rewards.NUM_ACTIONS)
+            sample = np.random.randint(0, env.NUM_ACTIONS)
             return sample
         else:
             return best_action
