@@ -1,10 +1,8 @@
 import os
-import gym
 import numpy as np
 import logging
 import time
 import sys
-from gym import wrappers
 from collections import deque
 
 from utils.general import get_logger, Progbar, export_plot
@@ -343,17 +341,6 @@ class QN(object):
         return avg_reward
 
 
-    def record(self):
-        """
-        Re create an env and record a video for one episode
-        """
-        env = gym.make(self.config.env_name)
-        env = gym.wrappers.Monitor(env, self.config.record_path, video_callable=lambda x: True, resume=True)
-        env = MaxAndSkipEnv(env, skip=self.config.skip_frame)
-        env = PreproWrapper(env, prepro=greyscale, shape=(80, 80, 1), 
-                        overwrite_render=self.config.overwrite_render)
-        self.evaluate(env, 1)
-
 
     def run(self, exp_schedule, lr_schedule):
         """
@@ -366,14 +353,7 @@ class QN(object):
         # initialize
         self.initialize()
 
-        # record one game at the beginning
-        if self.config.record:
-            self.record()
 
         # model
         self.train(exp_schedule, lr_schedule)
 
-        # record one game at the end
-        if self.config.record:
-            self.record()
-        
