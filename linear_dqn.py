@@ -54,14 +54,8 @@ class Linear(DQN):
 
         ##############################################################
         with tf.variable_scope(scope, reuse=reuse):
-            s_flattened = tf.contrib.layers.flatten(out)
-            hidden_layer = tf.contrib.layers.fully_connected(s_flattened,
-                                                             1024,
-                                                             activation_fn=tf.nn.relu)
-            
-            out = tf.contrib.layers.fully_connected(hidden_layer, 
-                                                    num_actions,
-                                                    activation_fn=None)
+            out = tf.contrib.layers.flatten(out)
+            out = tf.contrib.layers.fully_connected(out, num_actions, activation_fn=None)
         ##############################################################
         return out
 
