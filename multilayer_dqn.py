@@ -38,5 +38,3 @@ class MusicQN(Linear):
             out = tf.contrib.layers.fully_connected(out, num_actions, activation_fn=None)
             
         return out
-
-
