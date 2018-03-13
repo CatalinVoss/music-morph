@@ -172,13 +172,13 @@ class QN(object):
         while t < self.config.nsteps_train:
             total_reward = 0
             #state = self.env.reset()
-            state = rewards_env.env_reset()
+            state = self.env.env_reset()
             while True:
  #               print t
                 t += 1
                 last_eval += 1
 #                print total_reward
-                if self.config.render_train: self.env.render()
+                #if self.config.render_train: self.env.render()
                 # replay memory stuff
                 idx      = replay_buffer.store_frame(state)
                 q_input = replay_buffer.encode_recent_observation()
@@ -194,7 +194,7 @@ class QN(object):
                 # perform action in env
                 #print t
                 # TODO: log displays to tensorboard
-                new_state, reward, done, info = rewards_env.env_step(self.midi_gold, action, state) #, display=(t % DISPLAY_FREQ == 0))
+                new_state, reward, done, info = self.env.env_step(action, state) #, display=(t % DISPLAY_FREQ == 0))
 
                 # store the transition
                 replay_buffer.store_effect(idx, action, reward, done)
