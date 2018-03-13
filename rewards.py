@@ -4,22 +4,22 @@ import read_midis
 from midi_output import NeuralDJ
 
 #The possible notes on the launchpad
-NOTES = range(1)#range(24)
+NOTES = range(24)#range(1)
 NUM_NOTES = len(NOTES)
 
 #The possible occurences on the launchpad
 #If the occurence 'm' is turned on, it adds a one to the note track every m timesteps
 #0 represents the offset for that note, the offset can be any number from 0 to 63 (do a mod)
-OCCURENCES = [1, 2, 4, 0]#[1, 2, 4, 8, 16, 32, 64, 0] # 1 2 4 8 16
+OCCURENCES = [1, 2, 4, 8, 16, 32, 64, 0] #[1,2,4,0]
 NUM_OCCURENCES = len(OCCURENCES)
 BEAT_TYPES = NUM_OCCURENCES - 1
 
 #The length of the generated bar
-POW_OF_2 = 2#6
+POW_OF_2 = 6#2
 BARLENGTH = 2**POW_OF_2
 
 NUM_ACTIONS = NUM_NOTES*BEAT_TYPES + NUM_NOTES*POW_OF_2 + 1
-EPISODE_LENGTH = 10
+EPISODE_LENGTH = 1000#10
 #The amount to sample from the midi dataset when calculating rewards
 SUBSAMPLE = 1000
 
