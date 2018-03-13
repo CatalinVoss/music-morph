@@ -31,7 +31,7 @@ class MusicQN(Linear):
         # TODO: Build a more reasonable network!!!
 
         with tf.variable_scope(scope, reuse=reuse):
-            out = tf.contrib.layers.fully_connected(out, 2048, activation_fn=tf.nn.relu)
+            # out = tf.contrib.layers.fully_connected(out, 2048, activation_fn=tf.nn.relu)
             out = tf.contrib.layers.fully_connected(out, 1024, activation_fn=tf.nn.relu)
             out = tf.contrib.layers.flatten(out)
             out = tf.contrib.layers.fully_connected(out, 512, activation_fn=tf.nn.relu)

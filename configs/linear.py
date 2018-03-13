@@ -1,4 +1,5 @@
 import time
+
 class config():
     # env config
     render_train     = False
@@ -26,7 +27,7 @@ class config():
 
     # nature paper hyper params
     nsteps_train       = 2000000
-    batch_size         = 1
+    batch_size         = 32
     buffer_size        = 1000000
     target_update_freq = 1000
     gamma              = 0.99
