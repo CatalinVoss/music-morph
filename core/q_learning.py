@@ -43,8 +43,11 @@ class QN(object):
         self.midi_gold = read_midis.load_dataset("data/large.p") # dataset_100.p
         #[rewards_env.midify(rewards_env.random_state(), flat=True) for i in range(0, 1000)]
         #self.midi_gold = np.zeros((1, 8))
-        self.midi_gold = np.array(self.midi_gold) > 0
-        self.midi_gold = self.midi_gold.astype(np.float64)
+
+        # Threshold MIDI
+        self.midi_gold = (np.array(self.midi_gold) > 0)
+        # TODO: see if we ned to convert back to int
+
         #self.midi_gold *= 0
         #self.midi_gold += 1
 
