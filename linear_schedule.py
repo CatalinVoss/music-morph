@@ -59,7 +59,7 @@ class LinearExploration(LinearSchedule):
         if (rand_num <= self.epsilon):
             print self.epsilon
             print "e-greedy"
-            sample = np.random.randint(0, rewards.NUM_ACTIONS)
+            sample = np.random.randint(0, self.env.num_actions)
             return sample
         else:
             return best_action
