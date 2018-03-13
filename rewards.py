@@ -25,7 +25,8 @@ from midi_output import NeuralDJ
 
 ###frame_count = 0
 class MusicEnv:
-    def __init__(self, notes=range(24),log2_barlength=6,episode_length=1000,subsample=1000):
+    def __init__(self, notes=range(24),log2_barlength=6,episode_length=1000,subsample=1000,midigold=np.array(read_midis.load_dataset("data/dataset_100.p"))):
+        self.midigold = np.array(midigold) > 0
         self.notes = notes
         self.num_notes = len(self.notes)
 
@@ -132,7 +133,7 @@ class MusicEnv:
         else:
             return bar
 
-    def reward(self, midi_dataset, state, display=False):
+    def reward(self, state, display=False):
         """
         Given the MIDI dataset in the format of FLATTENED "numeric MIDI", array of shape (NUM_SAMPLES, notes*bars)
         compute the reward of a state as follows:
@@ -142,6 +143,7 @@ class MusicEnv:
             * compute the difference squared between the state midi and the dataset midis
             * return the negative of the minimal difference squared (difference squared from the closest sample)
         """
+        midi_dataset = self.midigold
         midi_state = self.midify(state, flat=True)
         if display:
             print "midi gold"
@@ -195,13 +197,13 @@ class MusicEnv:
             state[note_to_change,-1] = (state[note_to_change,-1] + change) % self.barlength
         return state
 
-    def env_step(self, midigold, action, state_onehot, display=False):
+    def env_step(self, action, state_onehot, display=False):
         state = self.undo_onehot(state_onehot)
         self.frame_count += 1
         #print frame_count
         #print "midigold shape " + str(midigold.shape)
         state = self.toggle(action, state)
-        return self.to_onehot(state), self.reward(midigold, state, display), self.frame_count == self.episode_length, None
+        return self.to_onehot(state), self.reward(state, display), self.frame_count == self.episode_length, None
 
 
 
@@ -210,11 +212,8 @@ class MusicEnv:
 
 ####################################################################################
 
-    def q_learner(self, total_time, alpha, gamma, epsilon_numerator=1, midigold=None, Q=None, reset_time=None):
-        if midigold is None:
-            midigold = np.ones((self.num_notes, self.barlength), dtype=np.int32)
-            midigold = midigold.ravel()[None,:]
-        R = lambda s: self.reward(midigold, s, display=False)
+    def q_learner(self, total_time, alpha, gamma, epsilon_numerator=1, Q=None, reset_time=None):
+        R = lambda s: self.reward(s, display=False)
         T = lambda s,a: self.toggle(a,s)
         Ind = lambda s: self.to_onehot(s,complete=True, just_index=True)
         NUM_STATES = (2**(self.beat_types)*self.barlength)**self.num_notes
@@ -241,10 +240,10 @@ class MusicEnv:
 
 
 if __name__ == "__main__":
-    music_env = MusicEnv(range(1),2)#1 note, 4 length bar
-    reset_time = 500
     midigold = np.array([[1,0,1,1]])
-    (rs, Q) = music_env.q_learner(total_time=5000, reset_time=reset_time, alpha=0.5, gamma=0.999, midigold=midigold)
+    music_env = MusicEnv(range(1),2, midigold=midigold)#1 note, 4 length bar
+    reset_time = 500
+    (rs, Q) = music_env.q_learner(total_time=5000, reset_time=reset_time, alpha=0.5, gamma=0.999)
     plt.figure()
     plt.plot(rs)
     plt.xlabel("Time, state reset every " + str(reset_time))

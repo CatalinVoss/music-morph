@@ -37,12 +37,12 @@ class QN(object):
         if logger is None:
             self.logger = get_logger(config.log_path)
         self.env = env
-        self.midi_gold = np.array(read_midis.load_dataset("data/dataset_100.p")) # dataset_100.p
+        #self.midi_gold = np.array(read_midis.load_dataset("data/dataset_100.p")) # dataset_100.p
         #[rewards_env.midify(rewards_env.random_state(), flat=True) for i in range(0, 1000)]
         #self.midi_gold = np.zeros((1, 8))
 
         # Threshold MIDI
-        self.midi_gold = (np.array(self.midi_gold) > 0)
+        #self.midi_gold = (np.array(self.midi_gold) > 0)
         # TODO: see if we ned to convert back to int
 
         #self.midi_gold *= 0
@@ -311,7 +311,7 @@ class QN(object):
                 action = self.get_action(q_input)
 
                 # perform action in env
-                new_state, reward, done, _ = self.env.env_step(self.midi_gold, action, state, False)
+                new_state, reward, done, _ = self.env.env_step(action, state, False)
 
                 # store in replay memory
                 replay_buffer.store_effect(idx, action, reward, done)
