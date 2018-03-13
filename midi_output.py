@@ -20,11 +20,6 @@ class NeuralDJ():
         """
         Assuming cols are meant to be spaced apart time_tick seconds
         """
-        # print('Pingggg')
-        # for x in range(10):
-        #     self.output.send(mido.Message('note_on', note=72))
-        #     sleep(1)
-
         note_status = np.zeros(self.NUM_NOTES)
 
         # Iterate over time steps -- columns
