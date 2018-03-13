@@ -3,27 +3,6 @@ import matplotlib.pyplot as plt
 import read_midis
 from midi_output import NeuralDJ
 
-#The possible notes on the launchpad
-###NOTES = range(24)#range(1)
-###NUM_NOTES = len(NOTES)
-
-#The possible occurences on the launchpad
-#If the occurence 'm' is turned on, it adds a one to the note track every m timesteps
-#0 represents the offset for that note, the offset can be any number from 0 to 63 (do a mod)
-###OCCURENCES = [1, 2, 4, 8, 16, 32, 64, 0] #[1,2,4,0]
-###NUM_OCCURENCES = len(OCCURENCES)
-###BEAT_TYPES = NUM_OCCURENCES - 1
-
-#The length of the generated bar
-###POW_OF_2 = 6#2
-###BARLENGTH = 2**POW_OF_2
-
-###NUM_ACTIONS = NUM_NOTES*BEAT_TYPES + NUM_NOTES*POW_OF_2 + 1
-###EPISODE_LENGTH = 1000#10
-#The amount to sample from the midi dataset when calculating rewards
-###SUBSAMPLE = 1000
-
-###frame_count = 0
 class MusicEnv:
     def __init__(self, notes=range(24),log2_barlength=6,episode_length=1000,subsample=1000,midigold=np.array(read_midis.load_dataset("data/dataset_100.p"))):
         # Threshold midi
@@ -158,11 +137,7 @@ class MusicEnv:
             
             plt.show()
         (dataset_length, midi_length) = midi_dataset.shape
-        #print midi_dataset.shape
-        #print len(midi_state)
         assert midi_length == len(midi_state)
-        # print "dataset_length = " + str(dataset_length)
-        # print "SUBSAMPLE = " + str(SUBSAMPLE)
         if dataset_length < self.subsample:
             compare = midi_dataset
         else:
@@ -206,12 +181,8 @@ class MusicEnv:
         state = self.toggle(action, state)
         return self.to_onehot(state), self.reward(state, display), self.frame_count == self.episode_length, None
 
-
-
-
-
-
 ####################################################################################
+# Tabular q learning experiments
 
     def q_learner(self, total_time, alpha, gamma, epsilon_numerator=1, Q=None, reset_time=None):
         R = lambda s: self.reward(s, display=False)
