@@ -148,8 +148,6 @@ class DQN(QN):
         self.file_writer = tf.summary.FileWriter(self.config.output_path, 
                                                 self.sess.graph)
 
-
-
     def save(self):
         """
         Saves session
@@ -159,6 +157,15 @@ class DQN(QN):
 
         self.saver.save(self.sess, self.config.model_output)
 
+    def load_params(self, model_path):
+        """
+        Load model parameters from model_path
+
+        Args:
+            model_path: (string) directory
+        """
+        # TODO: test
+        self.saver.restore(self.sess, tf.train.latest_checkpoint(model_path))
 
     def get_best_action(self, state):
         """

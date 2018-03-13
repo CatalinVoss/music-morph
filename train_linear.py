@@ -5,9 +5,10 @@ from linear_schedule import LinearExploration, LinearSchedule
 from linear_dqn import Linear
 
 from configs.linear import config
+import rewards
 
 if __name__ == '__main__':
-    env = None # TODO: pass in rewards model this way!
+    env = rewards.MusicEnv()
     
     # exploration strategy
     exp_schedule = LinearExploration(env, config.eps_begin, 

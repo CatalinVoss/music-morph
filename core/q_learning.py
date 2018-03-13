@@ -75,6 +75,14 @@ class QN(object):
         """
         pass
 
+    def load_params(self, model_path):
+        """
+        Load model parameters from model_path
+
+        Args:
+            model_path: (string) directory
+        """
+        pass
 
     def initialize(self):
         """
