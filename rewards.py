@@ -1,5 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import read_midis
+from midi_output import NeuralDJ
+
 #The possible notes on the launchpad
 NOTES = range(1)#range(24)
 NUM_NOTES = len(NOTES)
@@ -26,8 +29,7 @@ def env_reset():
     global frame_count
     frame_count = 0
     #print "resetting"
-    return random_state(True)
-
+    return random_state(False)
 
 def random_state(full=True, output_onehot=True):
     """
@@ -139,11 +141,16 @@ def reward(midi_dataset, state, display=False):
         
         plt.show()
     (dataset_length, midi_length) = midi_dataset.shape
+    #print midi_dataset.shape
+    #print len(midi_state)
     assert midi_length == len(midi_state)
+    # print "dataset_length = " + str(dataset_length)
+    # print "SUBSAMPLE = " + str(SUBSAMPLE)
     if dataset_length < SUBSAMPLE:
         compare = midi_dataset
     else:
         inds = np.random.choice(dataset_length, SUBSAMPLE, replace=False)
+        #print inds
         compare = midi_dataset[inds,:]
     diff = compare - midi_state
     biggest_distance = len(midi_state)
@@ -179,6 +186,7 @@ def env_step(midigold, action, state_onehot, display=False):
     global frame_count
     frame_count += 1
     #print frame_count
+    #print "midigold shape " + str(midigold.shape)
     state = toggle(action, state)
     return to_onehot(state), reward(midigold, state, display), frame_count == EPISODE_LENGTH, None
 

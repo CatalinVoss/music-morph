@@ -1,5 +1,6 @@
 # music_morph
 
+Code adapted from CS 234 DQN Assignment 2
 
 ### Using magenta
 ```

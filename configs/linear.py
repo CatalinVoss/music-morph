@@ -9,7 +9,7 @@ class config():
     high             = 255.
     epoch_time = int(time.time())
     # output config
-    output_path  = "results/q4_train_atari_linear" + str(epoch_time) + "/"
+    output_path  = "results/linear" + str(epoch_time) + "/"
     model_output = output_path + "model.weights/"
     log_path     = output_path + "log.txt"
     plot_output  = output_path + "scores.png"
@@ -27,17 +27,17 @@ class config():
 
     # nature paper hyper params
     nsteps_train       = 2000000
-    batch_size         = 32
+    batch_size         = 1
     buffer_size        = 1000000
-    target_update_freq = 10000
+    target_update_freq = 1000
     gamma              = 0.99
     learning_freq      = 4
     state_history      = 1
     skip_frame         = 4
-    lr_begin           = 0.00025
-    lr_end             = 0.00005
+    lr_begin           = 0.0025
+    lr_end             = 0.0005
     lr_nsteps          = nsteps_train/2
-    eps_begin          = 1
-    eps_end            = 0.1
+    eps_begin          = 0.001
+    eps_end            = 0.0001
     eps_nsteps         = 1000000
     learning_start     = 500

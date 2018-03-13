@@ -62,7 +62,11 @@ def construct_dataset(output_path, datadir, nsamples=None):
     print("Constructed dataset: %d example bars of size %d each" % (all_bars.shape[0], all_bars.shape[1]))
 
     with open(output_path, 'wb') as handle:
-        pickle.dump(all_bars, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        # pickle.dump(all_bars, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        # Workaround for large files
+        np.save(handle, all_bars, allow_pickle=False)
+        # pickle.dump(all_bars, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
 
 def construct_dataset_1bar_test(output_path, midifile):
     """
@@ -86,7 +90,7 @@ def load_dataset(dataset_path):
     Loads the bars from a given dataset pickle
     """
     with open(dataset_path, 'rb') as handle:
-        all_bars = pickle.load(handle)
+        all_bars = np.load(dataset_path)#pickle.load(handle)
         return all_bars
 
 def get_midi_bars(midi_fn):

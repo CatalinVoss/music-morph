@@ -14,7 +14,9 @@ from utils.wrappers import PreproWrapper, MaxAndSkipEnv
 
 import rewards as rewards_env
 import read_midis
-DISPLAY_FREQ=1000
+from midi_output import NeuralDJ
+
+# DISPLAY_FREQ=5000
 class QN(object):
     """
     Abstract Class for implementing a Q Network
@@ -37,11 +39,14 @@ class QN(object):
         if logger is None:
             self.logger = get_logger(config.log_path)
         self.env = env
-        self.midi_gold = np.array(read_midis.load_dataset("data/dataset_1bar.p"))
+        self.midi_gold = np.array(read_midis.load_dataset("data/large.p")) # dataset_100.p
         #[rewards_env.midify(rewards_env.random_state(), flat=True) for i in range(0, 1000)]
-        #self.midi_gold = np.zeros((1, 16))
-        print self.midi_gold.shape
-        # build model
+        #self.midi_gold = np.zeros((1, 8))
+        self.midi_gold = np.array(self.midi_gold) > 0
+        self.midi_gold = self.midi_gold.astype(np.float64)
+        #self.midi_gold *= 0
+        #self.midi_gold += 1
+
         self.build()
 
 
@@ -195,7 +200,8 @@ class QN(object):
 
                 # perform action in env
                 #print t
-                new_state, reward, done, info = rewards_env.env_step(self.midi_gold, action, state, display=(t % DISPLAY_FREQ == 0))
+                # TODO: log displays to tensorboard
+                new_state, reward, done, info = rewards_env.env_step(self.midi_gold, action, state)#, display=(t % DISPLAY_FREQ == 0))
 
                 # store the transition
                 replay_buffer.store_effect(idx, action, reward, done)
