@@ -2,7 +2,6 @@ import numpy as np
 from utils.test_env import EnvTest
 import sys
 sys.path.append('..')
-import rewards
 
 class LinearSchedule(object):
     def __init__(self, eps_begin, eps_end, nsteps):
