@@ -6,9 +6,10 @@ from multilayer_dqn import MusicQN
 
 from configs.multilayer import config
 import rewards
+import read_midis
 
 if __name__ == '__main__':
-    env = rewards.MusicEnv()
+    env = rewards.MusicEnv(midigold=np.array(read_midis.load_dataset("data/dataset_1000.p")))
     
     # exploration strategy
     exp_schedule = LinearExploration(env, config.eps_begin, 

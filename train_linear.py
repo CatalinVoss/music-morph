@@ -8,7 +8,7 @@ from configs.linear import config
 import rewards
 
 if __name__ == '__main__':
-    env = rewards.MusicEnv()
+    env = rewards.MusicEnv(midigold=np.array(read_midis.load_dataset("data/dataset_100.p")))
     
     # exploration strategy
     exp_schedule = LinearExploration(env, config.eps_begin, 
