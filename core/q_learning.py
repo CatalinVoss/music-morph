@@ -10,10 +10,6 @@ from utils.replay_buffer import ReplayBuffer
 from utils.preprocess import greyscale
 from utils.wrappers import PreproWrapper, MaxAndSkipEnv
 
-import rewards as rewards_env
-import read_midis
-from midi_output import NeuralDJ
-
 # DISPLAY_FREQ=5000
 class QN(object):
     """
@@ -37,17 +33,6 @@ class QN(object):
         if logger is None:
             self.logger = get_logger(config.log_path)
         self.env = env
-        #self.midi_gold = np.array(read_midis.load_dataset("data/dataset_100.p")) # dataset_100.p
-        #[rewards_env.midify(rewards_env.random_state(), flat=True) for i in range(0, 1000)]
-        #self.midi_gold = np.zeros((1, 8))
-
-        # Threshold MIDI
-        #self.midi_gold = (np.array(self.midi_gold) > 0)
-        # TODO: see if we ned to convert back to int
-
-        #self.midi_gold *= 0
-        #self.midi_gold += 1
-
         self.build()
 
 
