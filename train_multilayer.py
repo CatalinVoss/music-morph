@@ -5,9 +5,10 @@ from linear_schedule import LinearExploration, LinearSchedule
 from multilayer_dqn import MusicQN
 
 from configs.multilayer import config
+import rewards
 
 if __name__ == '__main__':
-    env = None # TODO: pass in rewards model this way!
+    env =  rewards.MusicEnv()# TODO: pass in rewards model this way!
     
     # exploration strategy
     exp_schedule = LinearExploration(env, config.eps_begin, 
