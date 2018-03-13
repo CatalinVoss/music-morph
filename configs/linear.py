@@ -3,7 +3,6 @@ class config():
     # env config
     render_train     = False
     render_test      = False
-    env_name         = "Pong-v0"
     overwrite_render = True
     record           = True
     high             = 255.
