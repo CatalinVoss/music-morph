@@ -26,6 +26,7 @@ from midi_output import NeuralDJ
 ###frame_count = 0
 class MusicEnv:
     def __init__(self, notes=range(24),log2_barlength=6,episode_length=1000,subsample=1000,midigold=np.array(read_midis.load_dataset("data/dataset_100.p"))):
+        # Threshold midi
         self.midigold = np.array(midigold) > 0
         self.notes = notes
         self.num_notes = len(self.notes)
