@@ -29,7 +29,7 @@ class config():
     nsteps_train       = 5000000
     batch_size         = 32
     buffer_size        = 1000000
-    target_update_freq = 10000
+    target_update_freq = 1000
     gamma              = 0.99
     learning_freq      = 4
     state_history      = 1

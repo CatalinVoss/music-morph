@@ -37,7 +37,7 @@ class config():
     lr_begin           = 0.0025
     lr_end             = 0.0005
     lr_nsteps          = nsteps_train/2
-    eps_begin          = 0.001
+    eps_begin          = 0.1
     eps_end            = 0.0001
     eps_nsteps         = 1000000
     learning_start     = 500
