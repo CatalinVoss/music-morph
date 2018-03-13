@@ -22,7 +22,7 @@ class Linear(DQN):
         (so we can use different batch sizes without rebuilding the model
         """
         # this information might be useful
-        state_shape = [rewards.NUM_NOTES, rewards.NUM_OCCURENCES - 1 +  rewards.BARLENGTH, 1] #using onehot rep for offset
+        state_shape = [self.env.num_notes, self.env.num_occurrences - 1 +  self.env.barlength, 1] #using onehot rep for offset
 
         ##############################################################
         self.s = tf.placeholder(tf.uint8, shape=(None, state_shape[0], state_shape[1]), name="state")
@@ -48,7 +48,7 @@ class Linear(DQN):
             out: (tf tensor) of shape = (batch_size, num_actions)
         """
         # this information might be useful
-        num_actions = rewards.NUM_ACTIONS
+        num_actions = self.env.num_actions
         print state.shape
         out = state
 
@@ -101,7 +101,7 @@ class Linear(DQN):
             target_q: (tf tensor) shape = (batch_size, num_actions)
         """
         # you may need this variable
-        num_actions = rewards.NUM_ACTIONS
+        num_actions = self.env.num_actions
 
         ##############################################################
         gamma = tf.constant(self.config.gamma, dtype=tf.float32, name="gamma")
@@ -135,7 +135,8 @@ class Linear(DQN):
 
 
 if __name__ == '__main__':
-    env = EnvTest((5, 5, 1))
+    #env = EnvTest((5, 5, 1))
+    env = rewards.MusicEnv()
 
     # exploration strategy
     exp_schedule = LinearExploration(env, config.eps_begin, 

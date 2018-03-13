@@ -37,7 +37,7 @@ class QN(object):
         if logger is None:
             self.logger = get_logger(config.log_path)
         self.env = env
-        self.midi_gold = np.array(read_midis.load_dataset("data/dataset_1bar.p")) # dataset_100.p
+        self.midi_gold = np.array(read_midis.load_dataset("data/dataset_100.p")) # dataset_100.p
         #[rewards_env.midify(rewards_env.random_state(), flat=True) for i in range(0, 1000)]
         #self.midi_gold = np.zeros((1, 8))
 
@@ -111,7 +111,7 @@ class QN(object):
             state: observation from gym
         """
         if np.random.random() < self.config.soft_epsilon:
-            return np.random.randint(0, rewards_env.NUM_OCCURENCES * rewards_env.NUM_NOTES)
+            return np.random.randint(0, self.env.num_actions)
         else:
             return self.get_best_action(state)[0]
 
@@ -307,10 +307,10 @@ class QN(object):
         
         for i in range(num_episodes):
             total_reward = 0
-            state = rewards_env.env_reset()
+            state = self.env.env_reset()
             t = 0
             while True:
-                if self.config.render_test: env.render()
+                #if self.config.render_test: env.render()
 
                 # store last state in buffer
                 idx     = replay_buffer.store_frame(state)
@@ -319,7 +319,7 @@ class QN(object):
                 action = self.get_action(q_input)
 
                 # perform action in env
-                new_state, reward, done, _ = rewards_env.env_step(self.midi_gold, action, state, False)
+                new_state, reward, done, _ = self.env.env_step(self.midi_gold, action, state, False)
 
                 # store in replay memory
                 replay_buffer.store_effect(idx, action, reward, done)

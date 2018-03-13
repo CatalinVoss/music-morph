@@ -23,7 +23,7 @@ class MusicQN(Linear):
             out: (tf tensor) of shape = (batch_size, num_actions)
         """
         # this information might be useful
-        num_actions = rewards.NUM_ACTIONS
+        num_actions = self.env.num_actions
         out = state
         print out.shape
         ##############################################################
