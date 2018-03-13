@@ -3,7 +3,7 @@ from utils.preprocess import greyscale
 from utils.wrappers import PreproWrapper, MaxAndSkipEnv
 
 from linear_schedule import LinearExploration, LinearSchedule
-from multilayer_dqn import NatureQN
+from multilayer_dqn import MusicQN
 
 from configs.multilayer import config
 
@@ -23,5 +23,5 @@ if __name__ == '__main__':
             config.lr_nsteps)
 
     # train model
-    model = NatureQN(env, config)
+    model = MusicQN(env, config)
     model.run(exp_schedule, lr_schedule)

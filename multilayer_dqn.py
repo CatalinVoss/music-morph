@@ -8,7 +8,7 @@ from linear_dqn import Linear
 
 import rewards
 
-class NatureQN(Linear):
+class MusicQN(Linear):
     def get_q_values_op(self, state, scope, reuse=False):
         """
         Returns Q values for all actions
@@ -31,34 +31,11 @@ class NatureQN(Linear):
         # TODO: Build a more reasonable network!!!
 
         with tf.variable_scope(scope, reuse=reuse):
-            first_hidden_layer = tf.contrib.layers.conv2d(
-                inputs=out,
-                num_outputs=32,
-                kernel_size=4,
-                stride=4,
-                activation_fn=tf.nn.relu
-                )
-            second_hidden_layer = tf.contrib.layers.conv2d(
-                inputs=first_hidden_layer,
-                num_outputs=64,
-                kernel_size=4,
-                stride=2,
-                activation_fn=tf.nn.relu
-                )
-            third_hidden_layer = tf.contrib.layers.conv2d(
-                inputs=second_hidden_layer,
-                num_outputs=64,
-                kernel_size=4,
-                stride=1,
-                activation_fn=tf.nn.relu
-                )
-            flattened = tf.contrib.layers.flatten(third_hidden_layer)
-            fc_512 = tf.contrib.layers.fully_connected(flattened,
-                                                       512,
-                                                       activation_fn=tf.nn.relu)
-            out = tf.contrib.layers.fully_connected(fc_512,
-                                                    num_actions,
-                                                    activation_fn=None)
+            out = tf.contrib.layers.fully_connected(out, 2048, activation_fn=tf.nn.relu)
+            out = tf.contrib.layers.fully_connected(out, 1024, activation_fn=tf.nn.relu)
+            out = tf.contrib.layers.flatten(out)
+            out = tf.contrib.layers.fully_connected(out, 512, activation_fn=tf.nn.relu)
+            out = tf.contrib.layers.fully_connected(out, num_actions, activation_fn=None)
             
         return out
 
