@@ -9,8 +9,9 @@ class config():
     high             = 255.
     epoch_time = int(time.time())
     # output config
+    previous_chkpt = None 
     output_path  = "results/linear" + str(epoch_time) + "/"
-    model_output = output_path + "model.weights/"
+    model_output = output_path + "model.ckpt"
     log_path     = output_path + "log.txt"
     plot_output  = output_path + "scores.png"
     record_path  = output_path + "monitor/"
