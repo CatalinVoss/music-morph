@@ -4,9 +4,9 @@ import tensorflow.contrib.layers as layers
 from utils.general import get_logger
 from utils.test_env import EnvTest
 from core.deep_q_learning import DQN
-from q1_schedule import LinearExploration, LinearSchedule
+from linear_schedule import LinearExploration, LinearSchedule
 
-from configs.q2_linear import config
+from configs.linear_test import config
 import rewards
 
 class Linear(DQN):
@@ -25,34 +25,6 @@ class Linear(DQN):
         state_shape = [rewards.NUM_NOTES, rewards.NUM_OCCURENCES - 1 +  rewards.BARLENGTH, 1] #using onehot rep for offset
 
         ##############################################################
-        """
-        TODO: add placeholders:
-              Remember that we stack 4 consecutive frames together, ending up with an input of shape
-              (80, 80, 4).
-               - self.s: batch of states, type = uint8
-                         shape = (batch_size, img height, img width, nchannels x config.state_history)
-               - self.a: batch of actions, type = int32
-                         shape = (batch_size)
-               - self.r: batch of rewards, type = float32
-                         shape = (batch_size)
-               - self.sp: batch of next states, type = uint8
-                         shape = (batch_size, img height, img width, nchannels x config.state_history)
-               - self.done_mask: batch of done, type = bool
-                         shape = (batch_size)
-                         note that this placeholder contains bool = True only if we are done in 
-                         the relevant transition
-               - self.lr: learning rate, type = float32
-        
-        (Don't change the variable names!)
-        
-        HINT: variables from config are accessible with self.config.variable_name
-              Also, you may want to use a dynamic dimension for the batch dimension.
-              Check the use of None for tensorflow placeholders.
-
-              you can also use the state_shape computed above.
-        """
-        ##############################################################
-        ################YOUR CODE HERE (6-15 lines) ##################
         self.s = tf.placeholder(tf.uint8, shape=(None, state_shape[0], state_shape[1]), name="state")
         self.a = tf.placeholder(tf.int32, shape=(None,), name="action")
         self.r = tf.placeholder(tf.float32, shape=(None,), name="reward")
@@ -60,7 +32,6 @@ class Linear(DQN):
         self.done_mask = tf.placeholder(tf.bool, shape=(None,), name="done_mask")
         self.lr = tf.placeholder(tf.float32, shape=(), name="lr")
         ##############################################################
-        ######################## END YOUR CODE #######################
 
 
     def get_q_values_op(self, state, scope, reuse=False):
@@ -82,24 +53,6 @@ class Linear(DQN):
         out = state
 
         ##############################################################
-        """
-        TODO: implement a fully connected with no hidden layer (linear
-            approximation) using tensorflow. In other words, if your state s
-            has a flattened shape of n, and you have m actions, the result of 
-            your computation sould be equal to
-                s * W + b where W is a matrix of shape n x m and b is 
-                a vector of size m (you should use bias)
-
-        HINT: you may find tensorflow.contrib.layers useful (imported)
-              make sure to understand the use of the scope param
-              make sure to flatten the state input (see tensorflow.contrib.layers.flatten())    
-
-              you can use any other methods from tensorflow
-              you are not allowed to import extra packages (like keras,
-              lasagne, cafe, etc.)
-        """
-        ##############################################################
-        ################ YOUR CODE HERE - 2-3 lines ##################
         with tf.variable_scope(scope, reuse=reuse):
             s_flattened = tf.contrib.layers.flatten(out)
             hidden_layer = tf.contrib.layers.fully_connected(s_flattened,
@@ -110,7 +63,6 @@ class Linear(DQN):
                                                     num_actions,
                                                     activation_fn=None)
         ##############################################################
-        ######################## END YOUR CODE #######################
         return out
 
 
@@ -138,26 +90,11 @@ class Linear(DQN):
                         for the target network
         """
         ##############################################################
-        """
-        TODO: add an operator self.update_target_op that assigns variables
-            from target_q_scope with the values of the corresponding var 
-            in q_scope
-
-        HINT: you may find the following functions useful:
-            - tf.get_collection
-            - tf.assign
-            - tf.group
-            
-        (be sure that you set self.update_target_op)
-        """
-        ##############################################################
-        ################### YOUR CODE HERE - 5-10 lines #############
         normal_q = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, q_scope)
         target_q = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, target_q_scope)
         assigned = [tf.assign(a, b) for a, b in zip(target_q, normal_q)]
         grouped = tf.group(*assigned) # expand elements in a list to be parameters
         self.update_target_op = grouped
-        ##############################################################
         ######################## END YOUR CODE #######################
 
 
@@ -173,29 +110,6 @@ class Linear(DQN):
         num_actions = rewards.NUM_ACTIONS
 
         ##############################################################
-        """
-        TODO: The loss for an example is defined as:
-                Q_samp(s) = r if done
-                          = r + gamma * max_a' Q_target(s', a')
-                loss = (Q_samp(s) - Q(s, a))^2 
-
-              You need to compute the average of the loss over the minibatch
-              and store the resulting scalar into self.loss
-
-        HINT: - config variables are accessible through self.config
-              - you can access placeholders like self.a (for actions)
-                self.r (rewards) or self.done_mask for instance
-              - target_q is the q-value evaluated at the s' states (the next states)  
-              - you may find the following functions useful
-                    - tf.cast
-                    - tf.reduce_max / reduce_sum
-                    - tf.one_hot
-                    - ...
-
-        (be sure that you set self.loss)
-        """
-        ##############################################################
-        ##################### YOUR CODE HERE - 4-5 lines #############
         gamma = tf.constant(self.config.gamma, dtype=tf.float32, name="gamma")
         negate_done = tf.cast(tf.logical_not(self.done_mask), tf.float32)
         max_q_a = tf.reduce_max(target_q, axis=1)
@@ -205,10 +119,7 @@ class Linear(DQN):
         diff = Q_samp_s - Q_s_a
         loss = tf.reduce_mean(diff**2)
         self.loss = loss
-        
-
         ##############################################################
-        ######################## END YOUR CODE #######################
 
 
     def add_optimizer_op(self, scope):
@@ -217,30 +128,6 @@ class Linear(DQN):
         """
 
         ##############################################################
-        """
-        TODO: 1. get Adam Optimizer (remember that we defined self.lr in the placeholders
-                section)
-              2. compute grads wrt to variables in scope for self.loss
-              3. clip the grads by norm with self.config.clip_val if self.config.grad_clip
-                is True
-              4. apply the gradients and store the train op in self.train_op
-               (sess.run(train_op) must update the variables)
-              5. compute the global norm of the gradients and store this scalar
-                in self.grad_norm
-
-        HINT: you may find the following functinos useful
-            - tf.get_collection
-            - optimizer.compute_gradients
-            - tf.clip_by_norm
-            - optimizer.apply_gradients
-            - tf.global_norm
-             
-             you can access config variable by writing self.config.variable_name
-
-        (be sure that you set self.train_op and self.grad_norm)
-        """
-        ##############################################################
-        #################### YOUR CODE HERE - 8-12 lines #############
         optimizer = tf.train.AdamOptimizer(self.lr)
         with tf.variable_scope(scope):
             variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=scope)
@@ -250,11 +137,7 @@ class Linear(DQN):
                 grads = [tf.clip_by_norm(t, self.config.clip_val) for t in grads]
             self.train_op = optimizer.apply_gradients(zip(grads, vars))
             self.grad_norm = tf.global_norm(grads)
-            
-        
         ##############################################################
-        ######################## END YOUR CODE #######################
-    
 
 
 if __name__ == '__main__':

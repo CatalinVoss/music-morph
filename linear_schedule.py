@@ -25,22 +25,12 @@ class LinearSchedule(object):
             t: (int) nth frames
         """
         ##############################################################
-        """
-        TODO: modify self.epsilon such that 
-               for t = 0, self.epsilon = self.eps_begin
-               for t = self.nsteps, self.epsilon = self.eps_end
-               linear decay between the two
-              self.epsilon should never go under self.eps_end
-        """
-        ##############################################################
-        ################ YOUR CODE HERE - 3-4 lines ##################
         total_decay = self.eps_end - self.eps_begin
         decay_per_step = (1.0 * total_decay) / self.nsteps
         self.epsilon = self.eps_begin + (decay_per_step * (t * 1.0))
         if t >= self.nsteps:
             self.epsilon = self.eps_end
         ##############################################################
-        ######################## END YOUR CODE ############## ########
 
 
 class LinearExploration(LinearSchedule):
@@ -65,16 +55,6 @@ class LinearExploration(LinearSchedule):
             an action
         """
         ##############################################################
-        """
-        TODO: with probability self.epsilon, return a random action
-               else, return best_action
-               you can access the environment stored in self.env
-               and epsilon with self.epsilon
-               you may want to use env.action_space.sample() to generate 
-               a random action        
-        """
-        ##############################################################
-        ################ YOUR CODE HERE - 4-5 lines ##################
         rand_num = np.random.random()
         if (rand_num <= self.epsilon):
             print self.epsilon
@@ -84,8 +64,6 @@ class LinearExploration(LinearSchedule):
         else:
             return best_action
         ##############################################################
-        ######################## END YOUR CODE #######################
-
 
 
 def test1():

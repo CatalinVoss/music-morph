@@ -10,7 +10,7 @@ class config():
     high             = 255.
     epoch_time = int(time.time())
     # output config
-    output_path  = "results/q5_train_atari_nature" + str(epoch_time) + "/"
+    output_path  = "results/multilayer" + str(epoch_time) + "/"
     model_output = output_path + "model.weights/"
     log_path     = output_path + "log.txt"
     plot_output  = output_path + "scores.png"

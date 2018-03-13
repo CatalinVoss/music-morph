@@ -9,7 +9,7 @@ class config():
     high             = 255.
     epoch_time = int(time.time())
     # output config
-    output_path  = "results/q4_train_atari_linear" + str(epoch_time) + "/"
+    output_path  = "results/linear" + str(epoch_time) + "/"
     model_output = output_path + "model.weights/"
     log_path     = output_path + "log.txt"
     plot_output  = output_path + "scores.png"
