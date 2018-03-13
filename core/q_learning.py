@@ -291,6 +291,7 @@ class QN(object):
         rewards = []
         
         for i in range(num_episodes):
+            print("Evaluating episode %d of %d" % (i,num_episodes))
             total_reward = 0
             state = self.env.env_reset()
             t = 0
