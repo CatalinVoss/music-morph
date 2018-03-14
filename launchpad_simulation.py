@@ -32,16 +32,27 @@ pink = (255,200,200)
 screen = pygame.display.set_mode((330,970))
 pygame.display.set_caption('Neural DJ')
 
+def box_rect(row, col):
+    return [(MARGIN + WIDTH) * col + MARGIN,
+                              (MARGIN + HEIGHT) * row + MARGIN,
+                              WIDTH,
+                              HEIGHT]
+
 def draw_launchpad(state, num_notes, num_occurrences):
     for row in range(num_notes):
         for col in range(num_occurrences):
             color = white if state[row, col] == 1 else gray
             pygame.draw.rect(screen,
                              color,
-                             [(MARGIN + WIDTH) * col + MARGIN,
-                              (MARGIN + HEIGHT) * row + MARGIN,
-                              WIDTH,
-                              HEIGHT])
+                             box_rect(row, col))
+
+def get_click_box(mouse_x, mouse_y, num_notes, num_occurrences):
+    for row in range(num_notes):
+        for col in range(num_occurrences):
+            rect = pygame.Rect(*box_rect(row, col))
+            if rect.collidepoint(mouse_x, mouse_y):
+                return (row, col)
+    return None
 
 if __name__ == '__main__':
     env = rewards.MusicEnv()
@@ -57,9 +68,12 @@ if __name__ == '__main__':
     state = np.zeros((env.num_notes, env.num_occurrences))
     # state[14,2] = 1
     # state[14,5] = 1
-    state[18,2] = 1
     # state[21,3] = 1
     # state[21,5] = 2
+
+    # neat solo:
+    # state[18,2] = 1
+
 
     while (True):
         if dj.bar_buffer.empty():
@@ -84,6 +98,11 @@ if __name__ == '__main__':
                 mouse_x, mouse_y = event.pos
                 mouseClicked = True
                 print("Click!")
+
+                box = get_click_box(mouse_x, mouse_y, env.num_notes, env.num_occurrences)
+                if box:
+                    state[box[0], box[1]] = 1 if state[box[0], box[1]] < 1 else 0
+                    print("Clicked box "+str(box))
                 # TODO: activate bad boy!
 
         dj.finish_playback()
