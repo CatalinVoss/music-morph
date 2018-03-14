@@ -110,7 +110,9 @@ class DQN(QN):
         self.sess.run(self.update_target_op)
 
         # for saving networks weights
-        self.saver = tf.train.Saver()
+        self.saver = tf.train.Saver(save_relative_paths=True)
+
+        # restore if the config specified to start somewhere
         if self.config.previous_chkpt is not None:
             self.load_params(self.config.previous_chkpt)
        
@@ -163,7 +165,6 @@ class DQN(QN):
         Args:
             model_path: (string) directory
         """
-        # TODO: test
         print "loading previosly saved params from : " + str(model_path)
         self.saver.restore(self.sess, tf.train.latest_checkpoint(model_path))
 
