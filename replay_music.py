@@ -9,8 +9,8 @@ if __name__ == '__main__':
     dj = NeuralDJ(read_midis.NUM_NOTES, read_midis.BAR_QUANT, read_midis.ROLL_WINDOW)
     dj.start_playback()
 
-    bars = np.load("somenoise.p.npy")
+    bars = np.load("lotta_harmony.npy") # catalins_funk.npy, wobble.npy, rahulsong.npy, fromzerotoone.npy, sowrongsoright.npy, lotta_harmony.npy
 
     for bar in bars:
-        print("Bar")
+        print("MIDI-bar")
         dj.add_bar(bar)

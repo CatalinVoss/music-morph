@@ -5,7 +5,7 @@ from linear_schedule import LinearExploration, LinearSchedule
 from multilayer_dqn import MusicQN
 from linear_dqn import Linear
 
-from configs.multilayer import config
+from configs.multilayer import config # multilayer / linear
 import rewards
 import numpy as np
 from midi_output import NeuralDJ
@@ -13,14 +13,16 @@ import read_midis
 import time
 
 
-PARAMS_PATH = 'results/linear1520971122' # TODO
+PARAMS_PATH = 'results/multilayer1521009279' # results/rahulnet #'results/linear1520970557' #'remote_results' #'results/linear1520971122' # TODO
+
+# 'results/rahulnet' #
 NUM_BARS = 100
 VELOCITY_MULTIPLIER = 90
 
 if __name__ == '__main__':
     env = rewards.MusicEnv()
 
-    model = Linear(env, config) # for multilayer use: MusicQN(env, config)
+    model = MusicQN(env, config) # MusicQN / Linear
     model.initialize()
     model.load_params(PARAMS_PATH)
 
@@ -29,14 +31,10 @@ if __name__ == '__main__':
 
     # Start in some funny state
     state = np.zeros((env.num_notes, env.num_occurrences))
-    # state[4,2] = 1
-    # state[8,2] = 1
-    state[12,6] = 1
-    state[16,6] = 1
-
-    # state[11,2] = 1
-    # state[22,2] = 1
-    # state[21,2] = 1
+    # state[14,2] = 1
+    # state[10,2] = 1
+    # state[18,2] = 1
+    # state[21,3] = 1
     state = env.to_onehot(state)
 
     # TODO do e-greedy
@@ -45,7 +43,8 @@ if __name__ == '__main__':
     for i in range(NUM_BARS):
         print("Generating bar %d/%d"% (i+1, NUM_BARS))
         action, q_vals = model.get_best_action(state)
-
+        action = np.argmax(q_vals)
+        # print(q_vals)
         # Get the best action that's *not* an offset
         # action = np.argmax(q_vals[0:env.num_notes*env.beat_types])
 
