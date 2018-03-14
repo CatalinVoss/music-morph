@@ -45,15 +45,29 @@ class MusicEnv:
 
     def env_reset(self):
         self.frame_count = 0
-        return self.random_state(False)
+        return self.random_state(chord=True)
 
-    def random_state(self, full=True, output_onehot=True):
+    def random_state(self, full=True, output_onehot=True, chord=False):
         """
         Debugging function for generating a random state where all buttons are pressed with prob. 1/2 (default)
         or generate a random state where exactly one button is pressed (full=False)
         The state has shape (notes, occurences)
         """
-        if full:
+        if chord:
+            res = np.zeros((self.num_notes, self.num_occurrences), dtype=np.int32)
+            note1 = np.random.randint(self.num_notes-7)
+            beat1 = np.random.randint(self.beat_types)
+            res[note1, beat1] = 1
+            res[note1, -1] = np.random.randint(self.barlength)
+            note2 = note1 + 4
+            beat2 = np.random.randint(self.beat_types)
+            res[note2, beat2] = 1
+            res[note2, -1] = np.random.randint(self.barlength)
+            note3 = note2 + 3
+            beat3 = np.random.randint(self.beat_types)
+            res[note3, beat3] = 1
+            res[note3, -1] = np.random.randint(self.barlength)
+        elif full:
             res = np.int32(np.random.rand(self.num_notes, self.num_occurrences) > 0.5)
             res[:, -1] = np.random.randint(self.barlength, size=self.num_notes, dtype=np.int32)
         else:
@@ -238,6 +252,7 @@ class MusicEnv:
             s = sp
             s_i = sp_i
         return rs, Q
+
 
 
 if __name__ == "__main__":
