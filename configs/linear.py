@@ -9,8 +9,9 @@ class config():
     high             = 255.
     epoch_time = int(time.time())
     # output config
+    previous_chkpt = None 
     output_path  = "results/linear" + str(epoch_time) + "/"
-    model_output = output_path + "model.weights/"
+    model_output = output_path + "model.ckpt"
     log_path     = output_path + "log.txt"
     plot_output  = output_path + "scores.png"
     record_path  = output_path + "monitor/"
@@ -19,7 +20,7 @@ class config():
     num_episodes_test = 10
     grad_clip         = True
     clip_val          = 10
-    saving_freq       = 25000
+    saving_freq       = 10000
     log_freq          = 50
     eval_freq         = 250000
     record_freq       = 250000

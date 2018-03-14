@@ -56,8 +56,6 @@ class LinearExploration(LinearSchedule):
         ##############################################################
         rand_num = np.random.random()
         if (rand_num <= self.epsilon):
-            print self.epsilon
-            print "e-greedy"
             sample = np.random.randint(0, self.env.num_actions)
             return sample
         else:
