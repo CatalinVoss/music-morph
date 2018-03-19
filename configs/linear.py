@@ -34,7 +34,6 @@ class config():
     gamma              = 0.99
     learning_freq      = 4
     state_history      = 1
-    skip_frame         = 4
     lr_begin           = 0.0025
     lr_end             = 0.0005
     lr_nsteps          = nsteps_train/2
