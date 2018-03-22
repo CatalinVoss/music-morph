@@ -100,7 +100,6 @@ class Linear(DQN):
             q: (tf tensor) shape = (batch_size, num_actions)
             target_q: (tf tensor) shape = (batch_size, num_actions)
         """
-        # you may need this variable
         num_actions = self.env.num_actions
 
         ##############################################################
