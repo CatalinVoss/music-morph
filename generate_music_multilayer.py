@@ -31,9 +31,9 @@ if __name__ == '__main__':
 
     # Start in some funny state
     state = np.zeros((env.num_notes, env.num_occurrences))
-    # state[14,2] = 1
+    state[14,2] = 1
     # state[10,2] = 1
-    # state[18,2] = 1
+    state[18,2] = 1
     # state[21,3] = 1
     state = env.to_onehot(state)
 
