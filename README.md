@@ -1,31 +1,4 @@
-# music_morph
+# Reinforcement learning DJ
+We model musical composition as a reinforce- ment learning (RL) problem in which an agent can choose as an action to add or subtract sets of repeated notes of various pitches from a discrete length melody. We reward an agent for creat- ing bars of music that are close to a corpus of human-generated MIDI music. We utilize deep- Q-learning. Our resulting compositions contain diverse harmonies and inherent global structure by construction. We describe how our approach can be integrated into a real time composition work- flow in which the RL agent and human composer take actions on a virtual “launchpad” instrument together to produce a longer, coherent song.
 
-Code adapted from CS 234 DQN Assignment 2
-
-### Using magenta
-```
-$ python convert_dir_to_note_sequences.py --input_dir=data/small_test --output_file='data/small_test.tfrecord' --numthreads=4
-```
-
-
-### Alterative frameworks
-```
-# python-midi
-
-import midi
-pattern = midi.read_midifile("/Users/catalin/Downloads/lmd_full/3/3c8a1e5c4f9149b82667f5f8b0b5f8bf.mid")
-print(pattern)
-```
-
-```
-# mido
-
-from mido import MidiFile
-
-mid = MidiFile('/Users/catalin/Downloads/lmd_full/3/3c8a1e5c4f9149b82667f5f8b0b5f8bf.mid')
-
-for i, track in enumerate(mid.tracks):
-    print('Track {}: {}'.format(i, track.name))
-    for msg in track:
-        print(msg)
-```
+DQN code adapted from Stanford's CS 234 Assignment 2.
